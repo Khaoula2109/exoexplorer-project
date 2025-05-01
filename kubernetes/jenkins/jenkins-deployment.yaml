@@ -1,0 +1,154 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: jenkins
+  namespace: jenkins
+spec:
+  replicas: 1                        # Nombre d'instances de Jenkins
+  selector:
+    matchLabels:
+      app: jenkins
+  template:
+    metadata:
+      labels:
+        app: jenkins
+    spec:
+      serviceAccountName: jenkins    # Utilise le compte de service jenkins
+      securityContext:
+        fsGroup: 1000                # Groupe de fichiers pour les volumes
+        runAsUser: 1000              # Utilisateur jenkins (UID 1000)
+      containers:
+      - name: jenkins
+        image: jenkins/jenkins:lts-jdk11
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8080        # Port de l'interface utilisateur
+          name: http
+        - containerPort: 50000       # Port pour les agents Jenkins
+          name: jnlp
+        securityContext:
+          allowPrivilegeEscalation: false
+          runAsUser: 1000            # Utilisateur jenkins (UID 1000)
+        resources:
+          requests:
+            cpu: 500m               # Demande de CPU minimale
+            memory: 512Mi           # Demande de mémoire minimale
+          limits:
+            cpu: 1000m              # Limite de CPU
+            memory: 2Gi             # Limite de mémoire
+        livenessProbe:              # Vérifie si Jenkins est en vie
+          httpGet:
+            path: /login
+            port: http
+          initialDelaySeconds: 90    # Attente initiale
+          timeoutSeconds: 5          # Timeout de la sonde
+          failureThreshold: 5        # Nombre d'échecs avant redémarrage
+        readinessProbe:             # Vérifie si Jenkins est prêt à recevoir du trafic
+          httpGet:
+            path: /login
+            port: http
+          initialDelaySeconds: 60    # Attente initiale
+          timeoutSeconds: 5          # Timeout de la sonde
+        volumeMounts:
+        - name: jenkins-home        # Monte le volume persistant
+          mountPath: /var/jenkins_home
+        env:
+        - name: JAVA_OPTS           # Options Java
+          value: >-
+            -Xms512m
+            -Xmx1024m
+            -Djenkins.install.runSetupWizard=true
+      volumes:
+      - name: jenkins-home
+        persistentVolumeClaim:
+          claimName: jenkins-pvc    # Référence à la PVC définie ci-dessous
+---
+apiVersion: v1
+kind: PersistentVolumeClaim        # Stockage persistant pour Jenkins
+metadata:
+  name: jenkins-pvc
+  namespace: jenkins
+spec:
+  accessModes:
+  - ReadWriteOnce                  # Accès en lecture/écriture par un seul nœud
+  resources:
+    requests:
+      storage: 10Gi                # Taille du stockage demandé
+  storageClassName: microk8s-hostpath  # Classe de stockage pour MicroK8s
+---
+apiVersion: v1
+kind: Service                      # Service pour exposer Jenkins
+metadata:
+  name: jenkins
+  namespace: jenkins
+spec:
+  type: NodePort                   # Type NodePort pour accéder depuis l'extérieur
+  ports:
+  - port: 8080                     # Port du service
+    targetPort: 8080               # Port cible dans le pod
+    nodePort: 30080                # Port exposé sur le nœud (accessible de l'extérieur)
+    name: http
+  - port: 50000                    # Port pour les agents Jenkins
+    targetPort: 50000
+    name: jnlp
+  selector:
+    app: jenkins
+---
+apiVersion: v1
+kind: ServiceAccount               # Compte de service pour Jenkins
+metadata:
+  name: jenkins
+  namespace: jenkins
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole                  # Rôle avec permissions Kubernetes
+metadata:
+  name: jenkins-role
+rules:
+- apiGroups: [""]
+  resources: ["pods"]
+  verbs: ["create","delete","get","list","patch","update","watch"]
+- apiGroups: [""]
+  resources: ["pods/exec"]
+  verbs: ["create","delete","get","list","patch","update","watch"]
+- apiGroups: [""]
+  resources: ["pods/log"]
+  verbs: ["get","list","watch"]
+- apiGroups: [""]
+  resources: ["secrets"]
+  verbs: ["get","list","watch"]
+- apiGroups: [""]
+  resources: ["events"]
+  verbs: ["get","list","watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding            # Liaison entre le rôle et le compte de service
+metadata:
+  name: jenkins-role-binding
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: jenkins-role
+subjects:
+- kind: ServiceAccount
+  name: jenkins
+  namespace: jenkins
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress                       # Configuration d'Ingress pour l'accès externe
+metadata:
+  name: jenkins-ingress
+  namespace: jenkins
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  rules:
+  - http:
+      paths:
+      - path: /jenkins
+        pathType: Prefix
+        backend:
+          service:
+            name: jenkins
+            port:
+              number: 8080

@@ -1,0 +1,10 @@
+[
+  {
+    "nomExoplanete": "Kepler-22b",
+    "image": "https://example.com/images/kepler-22b.jpg"
+  },
+  {
+    "nomExoplanete": "Proxima Centauri b",
+    "image": "https://example.com/images/proxima.jpg"
+  }
+]

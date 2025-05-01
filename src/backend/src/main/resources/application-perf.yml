@@ -1,0 +1,64 @@
+spring:
+  config:
+    activate:
+      on-profile: perf
+
+  # Configuration spécifique pour la base de données de performance
+  datasource:
+    url: jdbc:oracle:thin:@exoexplorerdb_low?TNS_ADMIN=/home/khaoula-ouazri/Desktop/exoExplorer-project/backend/src/main/resources/Wallet_exoExplorerDB
+    driver-class-name: oracle.jdbc.OracleDriver
+    username: PERF
+    password: Khaoula0999Anfa
+    hikari:
+      maximum-pool-size: 150        # Augmenté pour les tests de performance
+      minimum-idle: 50              # Augmenté pour les tests de performance
+      idle-timeout: 25000
+      connection-timeout: 60000
+      max-lifetime: 600000
+
+  jpa:
+    hibernate:
+      ddl-auto: update              # Pour créer/mettre à jour les tables automatiquement
+    show-sql: true
+    database-platform: org.hibernate.dialect.OracleDialect
+    properties:
+      hibernate:
+        format_sql: true
+        default_schema: PERF        # Spécifier explicitement le schéma PERF
+
+# Paramètres serveur optimisés pour les tests de performance
+server:
+  tomcat:
+    connection-timeout: 120s
+    threads:
+      max: 1500                     # Augmenté pour gérer plus de connexions simultanées
+      min-spare: 150
+    max-connections: 8192           # Augmenter le nombre maximum de connexions
+    accept-count: 500               # File d'attente des connexions
+
+# Logging réduit pour améliorer les performances
+logging:
+  level:
+    root: WARN
+    com.example.exoExplorer: INFO
+    org.hibernate.SQL: INFO        # Réduit de DEBUG à INFO pour les tests de perf
+    org.hibernate.type.descriptor.sql.BasicBinder: INFO
+
+# Paramètres JWT avec expiration plus longue pour les tests
+jwt:
+  expiration: 7200000               # 2 heures au lieu de 1 heure
+
+# Configuration OTP plus longue pour les tests
+app:
+  otp:
+    expiration-minutes: 30          # 30 minutes au lieu de 5
+
+# Désactiver certaines fonctionnalités pour les tests de performance
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health             # Limité à l'essentiel pour les tests de perf
+  endpoint:
+    health:
+      show-details: never           # Réduire les détails pour améliorer les performances
