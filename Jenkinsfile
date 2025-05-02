@@ -76,7 +76,8 @@ pipeline {
                 cleanWs()
             }
             echo "Le pipeline est terminé."
-      success {
+        }
+        success {
             echo 'Déploiement réussi!'
         }
         failure {
