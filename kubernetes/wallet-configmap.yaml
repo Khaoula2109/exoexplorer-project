@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: oracle-wallet-config
+  namespace: exoexplorer
+data:
+  tnsnames.ora: |
+    exoexplorerdb_high = (description= (retry_count=20)(retry_delay=3)(address=(protocol=tcps)(port=1522)(host=adb.eu-paris-1.oraclecloud.com))(connect_data=(service_name=g7425f7a5c2d7ae_exoexplorerdb_high.adb.oraclecloud.com))(security=(ssl_server_dn_match=yes)))
+    exoexplorerdb_low = (description= (retry_count=20)(retry_delay=3)(address=(protocol=tcps)(port=1522)(host=adb.eu-paris-1.oraclecloud.com))(connect_data=(service_name=g7425f7a5c2d7ae_exoexplorerdb_low.adb.oraclecloud.com))(security=(ssl_server_dn_match=yes)))
+    exoexplorerdb_medium = (description= (retry_count=20)(retry_delay=3)(address=(protocol=tcps)(port=1522)(host=adb.eu-paris-1.oraclecloud.com))(connect_data=(service_name=g7425f7a5c2d7ae_exoexplorerdb_medium.adb.oraclecloud.com))(security=(ssl_server_dn_match=yes)))
+    exoexplorerdb_tp = (description= (retry_count=20)(retry_delay=3)(address=(protocol=tcps)(port=1522)(host=adb.eu-paris-1.oraclecloud.com))(connect_data=(service_name=g7425f7a5c2d7ae_exoexplorerdb_tp.adb.oraclecloud.com))(security=(ssl_server_dn_match=yes)))
+    exoexplorerdb_tpurgent = (description= (retry_count=20)(retry_delay=3)(address=(protocol=tcps)(port=1522)(host=adb.eu-paris-1.oraclecloud.com))(connect_data=(service_name=g7425f7a5c2d7ae_exoexplorerdb_tpurgent.adb.oraclecloud.com))(security=(ssl_server_dn_match=yes)))
+  sqlnet.ora: |
+    WALLET_LOCATION = (SOURCE = (METHOD = file) (METHOD_DATA = (DIRECTORY="?/network/admin")))
+    SSL_SERVER_DN_MATCH=yes
+  ojdbc.properties: |
+    oracle.net.wallet_location=(SOURCE=(METHOD=FILE)(METHOD_DATA=(DIRECTORY=${TNS_ADMIN})))
