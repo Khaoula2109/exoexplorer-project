@@ -72,9 +72,11 @@ pipeline {
     
     post {
         always {
-            cleanWs()
-        }
-        success {
+            node {
+                cleanWs()
+            }
+            echo "Le pipeline est terminé."
+      success {
             echo 'Déploiement réussi!'
         }
         failure {
