@@ -4,7 +4,7 @@ pipeline {
     environment {
         DOCKER_HUB_CREDS = credentials('docker-hub-credentials')
         VERSION = "${env.BUILD_NUMBER}"
-        DOCKERHUB_USERNAME = "your-dockerhub-username"
+        DOCKERHUB_USERNAME = "khaoula2109"
         PATH = "$PATH:/var/jenkins_home/.nvm/versions/node/v18.18.0/bin"
     }
     
