@@ -50,9 +50,6 @@ pipeline {
         }
         
         stage('Build Backend') {
-            tools {
-                jdk 'JDK 21'  // Nom configuré dans la configuration globale des outils
-            }
             steps {
                 dir('backend') {
                     sh 'chmod +x mvnw'
