@@ -5,6 +5,7 @@ pipeline {
         DOCKER_HUB_CREDS = credentials('docker-hub-credentials')
         VERSION = "${env.BUILD_NUMBER}"
         DOCKERHUB_USERNAME = "your-dockerhub-username"
+        PATH = "$PATH:/var/jenkins_home/.nvm/versions/node/v18.18.0/bin"
     }
     
     stages {
@@ -17,8 +18,17 @@ pipeline {
         stage('Install Node.js') {
             steps {
                 sh '''
-                curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
-                sudo apt-get install -y nodejs
+                # Install NVM (Node Version Manager)
+                curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.5/install.sh | bash
+                
+                # Add NVM to PATH for this session
+                export NVM_DIR="$HOME/.nvm"
+                [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+                
+                # Install Node.js
+                nvm install 18
+                
+                # Verify installation
                 node -v
                 npm -v
                 '''
@@ -27,10 +37,15 @@ pipeline {
         
         stage('Build Frontend') {
             steps {
-                dir('frontend') {
-                    sh 'npm install'
-                    sh 'npm run build'
-                }
+                sh '''
+                # Add NVM to PATH for this session
+                export NVM_DIR="$HOME/.nvm"
+                [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+                
+                cd frontend
+                npm install
+                npm run build
+                '''
             }
         }
         
