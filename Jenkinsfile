@@ -14,6 +14,17 @@ pipeline {
             }
         }
         
+        stage('Install Node.js') {
+            steps {
+                sh '''
+                curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
+                sudo apt-get install -y nodejs
+                node -v
+                npm -v
+                '''
+            }
+        }
+        
         stage('Build Frontend') {
             steps {
                 dir('frontend') {
@@ -26,6 +37,7 @@ pipeline {
         stage('Build Backend') {
             steps {
                 dir('backend') {
+                    sh 'chmod +x mvnw'
                     sh './mvnw clean package -DskipTests'
                 }
             }
@@ -60,8 +72,8 @@ pipeline {
                 
                 // Déploiement sur Kubernetes
                 sh 'kubectl apply -f kubernetes/namespace.yaml'
-                sh 'kubectl apply -f kubernetes/secrets.yaml'
-                sh 'kubectl apply -f kubernetes/wallet-configmap.yaml'
+                sh 'kubectl apply -f kubernetes/db-secrets.yaml'
+                sh 'kubectl apply -f kubernetes/oracle-wallet-configmap.yaml'
                 sh 'kubectl apply -f kubernetes/backend-deployment.yaml'
                 sh 'kubectl apply -f kubernetes/frontend-deployment.yaml'
                 sh 'kubectl apply -f kubernetes/ingress.yaml'
