@@ -23,7 +23,7 @@ pipeline {
                 
                 # Add NVM to PATH for this session
                 export NVM_DIR="$HOME/.nvm"
-                [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+                [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
                 
                 # Install Node.js
                 nvm install 18
@@ -40,7 +40,7 @@ pipeline {
                 sh '''
                 # Add NVM to PATH for this session
                 export NVM_DIR="$HOME/.nvm"
-                [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+                [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
                 
                 cd frontend
                 npm install
