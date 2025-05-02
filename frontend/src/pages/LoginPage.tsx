@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+
 import { LogIn } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../contexts/ThemeContext';
@@ -13,12 +14,12 @@ const LoginPage: React.FC = () => {
   const { theme } = useTheme();
   const { login } = useAuth();
   const navigate = useNavigate();
-
   const [modal, setModal] = useState({
     show: false,
     message: '',
     type: 'success' as 'success' | 'error',
   });
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -83,6 +84,7 @@ const LoginPage: React.FC = () => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 onKeyDown={handleKeyDown}
+
                 className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 ${inputClass}`}
                 placeholder="••••••••"
                 required
@@ -105,7 +107,6 @@ const LoginPage: React.FC = () => {
           </p>
         </div>
       </div>
-
       {/* ✅ Modale message */}
       <ModalMessage
         show={modal.show}
@@ -118,3 +119,4 @@ const LoginPage: React.FC = () => {
 };
 
 export default LoginPage;
+

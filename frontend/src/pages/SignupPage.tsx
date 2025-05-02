@@ -12,6 +12,7 @@ const SignupPage: React.FC = () => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [modal, setModal] = useState({ show: false, type: 'success', message: '' });
 
+
   const { t } = useTranslation();
   const { theme } = useTheme();
   const { signup } = useAuth();
@@ -78,7 +79,6 @@ const SignupPage: React.FC = () => {
             <UserPlus className="w-12 h-12 text-blue-500" />
           </div>
           <h2 className="text-2xl font-bold text-center mb-8">{t('auth.signup.title')}</h2>
-
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
               <label htmlFor="email" className="block text-sm font-medium mb-2">
@@ -95,7 +95,6 @@ const SignupPage: React.FC = () => {
                 required
               />
             </div>
-
             <div>
               <label htmlFor="password" className="block text-sm font-medium mb-2">
                 {t('auth.signup.password')}

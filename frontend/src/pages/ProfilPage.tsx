@@ -17,7 +17,6 @@ const ProfilePage: React.FC = () => {
   const [darkMode, setDarkMode] = useState(theme === 'dark');
   const [language, setLanguage] = useState(i18n.language);
   const [editable, setEditable] = useState(false);
-
   const [showChangePassword, setShowChangePassword] = useState(false);
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
