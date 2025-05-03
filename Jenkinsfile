@@ -1,48 +1,56 @@
 pipeline {
     agent any
-
+    
     environment {
         DOCKER_HUB_CREDS = credentials('docker-hub-credentials')
-        VERSION          = "${env.BUILD_NUMBER}"
+        VERSION = "${env.BUILD_NUMBER}"
         DOCKERHUB_USERNAME = "khaoula2109"
-
-        # Node 18 installé via NVM
-        PATH   = "$PATH:/var/jenkins_home/.nvm/versions/node/v18.18.0/bin"
-        # Docker CLI
-        DOCKER_HOST = "tcp://localhost:2375"
-        DOCKER_PATH = "/usr/bin/docker"
+        PATH = "$PATH:/var/jenkins_home/.nvm/versions/node/v18.18.0/bin"
+        DOCKER_HOST = "tcp://localhost:2375"  // Configuration du Docker host
+        DOCKER_PATH = "/usr/bin/docker"       // Chemin complet vers l'exécutable Docker
     }
-
+    
     stages {
-
         stage('Checkout') {
-            steps { checkout scm }
+            steps {
+                checkout scm
+            }
         }
-
+        
         stage('Install Node.js') {
             steps {
                 sh '''
+                # Install NVM (Node Version Manager)
                 curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.5/install.sh | bash
+                
+                # Add NVM to PATH for this session
                 export NVM_DIR="$HOME/.nvm"
                 [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
+                
+                # Install Node.js
                 nvm install 18
-                node -v && npm -v
+                
+                # Verify installation
+                node -v
+                npm -v
                 '''
             }
         }
-
+        
         stage('Build Frontend') {
             steps {
                 sh '''
+                # Add NVM to PATH for this session
                 export NVM_DIR="$HOME/.nvm"
                 [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
+                
                 cd frontend
                 npm install
                 npm run build
                 '''
             }
         }
-
+        
         stage('Build Backend') {
             steps {
                 dir('backend') {
@@ -51,33 +59,47 @@ pipeline {
                 }
             }
         }
-
+        
         stage('Test Docker Connection') {
             steps {
                 sh '''
-                echo "Vérification de Docker"
-                ${DOCKER_PATH} --version || echo "Pas de Docker à ${DOCKER_PATH}"
-                /usr/local/bin/docker --version || echo "Pas de Docker à /usr/local/bin"
+                # Vérifiez que Docker est accessible
+                echo "Vérification de Docker avec le chemin complet"
+                ${DOCKER_PATH} --version || echo "Docker n'est pas accessible avec le chemin complet"
+                
+                # Tester avec d'autres chemins possibles
+                /usr/local/bin/docker --version || echo "Docker n'est pas accessible dans /usr/local/bin"
+                
+                # Rechercher où Docker est installé
+                find / -name docker -type f -executable 2>/dev/null || echo "Docker non trouvé dans le système de fichiers"
                 '''
             }
         }
-
+        
         stage('Build Docker Images') {
             steps {
                 sh '''
+                # Construction des images Docker
                 ${DOCKER_PATH} build -t ${DOCKERHUB_USERNAME}/exoexplorer-frontend:${VERSION} ./frontend
                 ${DOCKER_PATH} build -t ${DOCKERHUB_USERNAME}/exoexplorer-backend:${VERSION} ./backend
+                
+                # Création des tags "latest"
                 ${DOCKER_PATH} tag ${DOCKERHUB_USERNAME}/exoexplorer-frontend:${VERSION} ${DOCKERHUB_USERNAME}/exoexplorer-frontend:latest
                 ${DOCKER_PATH} tag ${DOCKERHUB_USERNAME}/exoexplorer-backend:${VERSION} ${DOCKERHUB_USERNAME}/exoexplorer-backend:latest
+                
+                # Liste des images pour vérification
                 ${DOCKER_PATH} images | grep ${DOCKERHUB_USERNAME}
                 '''
             }
         }
-
+        
         stage('Push to Docker Hub') {
             steps {
                 sh '''
+                # Connexion à Docker Hub
                 echo $DOCKER_HUB_CREDS_PSW | ${DOCKER_PATH} login -u $DOCKER_HUB_CREDS_USR --password-stdin
+                
+                # Push des images vers Docker Hub
                 ${DOCKER_PATH} push ${DOCKERHUB_USERNAME}/exoexplorer-frontend:${VERSION}
                 ${DOCKER_PATH} push ${DOCKERHUB_USERNAME}/exoexplorer-backend:${VERSION}
                 ${DOCKER_PATH} push ${DOCKERHUB_USERNAME}/exoexplorer-frontend:latest
@@ -85,47 +107,52 @@ pipeline {
                 '''
             }
         }
-
-        /* ---------- PATCH OPTION 1 : kubectl dans le workspace ---------- */
+        
         stage('Update Kubernetes Deployments') {
-            steps {
-                sh '''
-                # Télécharger kubectl localement si absent
-                if ! command -v kubectl >/dev/null 2>&1; then
-                    curl -LO "https://dl.k8s.io/release/$(curl -Ls https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
-                    chmod +x kubectl
-                    export PATH="$PATH:$PWD"         # on l’ajoute au PATH pour cette session
-                fi
+    steps {
+        sh '''
+        # Télécharge kubectl s'il n'existe pas déjà
+        if ! command -v kubectl &> /dev/null; then
+            curl -LO "https://dl.k8s.io/release/$(curl -Ls https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+            chmod +x kubectl
+            export PATH=$PATH:$PWD     # <-- ajoute kubectl du workspace
+        fi
 
-                # Mettre à jour les tags dans les manifestes
-                sed -i "s|image: ${DOCKERHUB_USERNAME}/exoexplorer-backend:.*|image: ${DOCKERHUB_USERNAME}/exoexplorer-backend:${VERSION}|" kubernetes/backend-deployment.yaml
-                sed -i "s|image: ${DOCKERHUB_USERNAME}/exoexplorer-frontend:.*|image: ${DOCKERHUB_USERNAME}/exoexplorer-frontend:${VERSION}|" kubernetes/frontend-deployment.yaml
+        # Mise à jour des manifestes
+        sed -i "s|image: ${DOCKERHUB_USERNAME}/exoexplorer-backend:.*|image: ${DOCKERHUB_USERNAME}/exoexplorer-backend:${VERSION}|" kubernetes/backend-deployment.yaml
+        sed -i "s|image: ${DOCKERHUB_USERNAME}/exoexplorer-frontend:.*|image: ${DOCKERHUB_USERNAME}/exoexplorer-frontend:${VERSION}|" kubernetes/frontend-deployment.yaml
 
-                # Appliquer sur le cluster
-                kubectl apply -f kubernetes/namespace.yaml
-                kubectl apply -f kubernetes/db-secrets.yaml
-                kubectl apply -f kubernetes/oracle-wallet-configmap.yaml
-                kubectl apply -f kubernetes/backend-deployment.yaml
-                kubectl apply -f kubernetes/frontend-deployment.yaml
-                kubectl apply -f kubernetes/ingress.yaml
-                kubectl apply -f kubernetes/hpa.yaml
-                '''
-            }
-        }
-        /* ---------------------------------------------------------------- */
-
+        # Déploiement sur Kubernetes
+        kubectl apply -f kubernetes/namespace.yaml
+        kubectl apply -f kubernetes/db-secrets.yaml
+        kubectl apply -f kubernetes/oracle-wallet-configmap.yaml
+        kubectl apply -f kubernetes/backend-deployment.yaml
+        kubectl apply -f kubernetes/frontend-deployment.yaml
+        kubectl apply -f kubernetes/ingress.yaml
+        kubectl apply -f kubernetes/hpa.yaml
+        '''
+    }
+}        
         stage('Cleanup') {
             steps {
-                sh '${DOCKER_PATH} system prune -af --volumes || true'
+                sh '''
+                # Nettoyage des images locales pour économiser de l'espace disque
+                ${DOCKER_PATH} system prune -af --volumes || true
+                '''
                 cleanWs()
             }
         }
     }
-
+    
     post {
-        success { echo 'Déploiement réussi!' }
-        failure { echo 'Le pipeline a échoué. Veuillez vérifier les logs.' }
-        always  { echo 'Le pipeline est terminé.' }
+        success {
+            echo 'Déploiement réussi!'
+        }
+        failure {
+            echo 'Le pipeline a échoué. Veuillez vérifier les logs.'
+        }
+        always {
+            echo "Le pipeline est terminé."
+        }
     }
-}
-
+} 
