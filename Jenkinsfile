@@ -6,6 +6,7 @@ pipeline {
         VERSION = "${env.BUILD_NUMBER}"
         DOCKERHUB_USERNAME = "khaoula2109"
         PATH = "$PATH:/var/jenkins_home/.nvm/versions/node/v18.18.0/bin"
+        DOCKER_HOST = "tcp://localhost:2375"  // Configuration du Docker host
     }
     
     stages {
@@ -58,51 +59,58 @@ pipeline {
             }
         }
         
-        stage('Use Docker Container') {
-            agent {
-                docker {
-                    image 'docker:latest'
-                    args '-v /var/run/docker.sock:/var/run/docker.sock'
-                    reuseNode true
-                }
+        stage('Test Docker Connection') {
+            steps {
+                sh '''
+                # Vérifiez que Docker est accessible
+                docker version
+                docker info
+                '''
             }
-            stages {
-                stage('Build and Push Docker Images') {
-                    steps {
-                        withCredentials([string(credentialsId: 'docker-hub-credentials', variable: 'DOCKER_PASSWORD')]) {
-                            sh '''
-                            # Login to Docker Hub
-                            echo $DOCKER_PASSWORD | docker login -u ${DOCKERHUB_USERNAME} --password-stdin
-                            
-                            # Build Docker images
-                            docker build -t ${DOCKERHUB_USERNAME}/exoexplorer-frontend:${VERSION} ./frontend
-                            docker build -t ${DOCKERHUB_USERNAME}/exoexplorer-backend:${VERSION} ./backend
-                            
-                            # Tag images as latest
-                            docker tag ${DOCKERHUB_USERNAME}/exoexplorer-frontend:${VERSION} ${DOCKERHUB_USERNAME}/exoexplorer-frontend:latest
-                            docker tag ${DOCKERHUB_USERNAME}/exoexplorer-backend:${VERSION} ${DOCKERHUB_USERNAME}/exoexplorer-backend:latest
-                            
-                            # Push images to Docker Hub
-                            docker push ${DOCKERHUB_USERNAME}/exoexplorer-frontend:${VERSION}
-                            docker push ${DOCKERHUB_USERNAME}/exoexplorer-backend:${VERSION}
-                            docker push ${DOCKERHUB_USERNAME}/exoexplorer-frontend:latest
-                            docker push ${DOCKERHUB_USERNAME}/exoexplorer-backend:latest
-                            '''
-                        }
-                    }
-                }
+        }
+        
+        stage('Build Docker Images') {
+            steps {
+                sh '''
+                # Construction des images Docker
+                docker build -t ${DOCKERHUB_USERNAME}/exoexplorer-frontend:${VERSION} ./frontend
+                docker build -t ${DOCKERHUB_USERNAME}/exoexplorer-backend:${VERSION} ./backend
+                
+                # Création des tags "latest"
+                docker tag ${DOCKERHUB_USERNAME}/exoexplorer-frontend:${VERSION} ${DOCKERHUB_USERNAME}/exoexplorer-frontend:latest
+                docker tag ${DOCKERHUB_USERNAME}/exoexplorer-backend:${VERSION} ${DOCKERHUB_USERNAME}/exoexplorer-backend:latest
+                
+                # Liste des images pour vérification
+                docker images | grep ${DOCKERHUB_USERNAME}
+                '''
+            }
+        }
+        
+        stage('Push to Docker Hub') {
+            steps {
+                sh '''
+                # Connexion à Docker Hub
+                echo $DOCKER_HUB_CREDS_PSW | docker login -u $DOCKER_HUB_CREDS_USR --password-stdin
+                
+                # Push des images vers Docker Hub
+                docker push ${DOCKERHUB_USERNAME}/exoexplorer-frontend:${VERSION}
+                docker push ${DOCKERHUB_USERNAME}/exoexplorer-backend:${VERSION}
+                docker push ${DOCKERHUB_USERNAME}/exoexplorer-frontend:latest
+                docker push ${DOCKERHUB_USERNAME}/exoexplorer-backend:latest
+                '''
             }
         }
         
         stage('Update Kubernetes Deployments') {
-            agent {
-                docker {
-                    image 'bitnami/kubectl:latest'
-                    reuseNode true
-                }
-            }
             steps {
                 sh '''
+                # Installation de kubectl si nécessaire
+                if ! command -v kubectl &> /dev/null; then
+                    curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+                    chmod +x kubectl
+                    mv kubectl /usr/local/bin/
+                fi
+                
                 # Mise à jour des manifestes Kubernetes
                 sed -i "s|image: ${DOCKERHUB_USERNAME}/exoexplorer-backend:.*|image: ${DOCKERHUB_USERNAME}/exoexplorer-backend:${VERSION}|" kubernetes/backend-deployment.yaml
                 sed -i "s|image: ${DOCKERHUB_USERNAME}/exoexplorer-frontend:.*|image: ${DOCKERHUB_USERNAME}/exoexplorer-frontend:${VERSION}|" kubernetes/frontend-deployment.yaml
@@ -121,6 +129,10 @@ pipeline {
         
         stage('Cleanup') {
             steps {
+                sh '''
+                # Nettoyage des images locales pour économiser de l'espace disque
+                docker system prune -af --volumes || true
+                '''
                 cleanWs()
             }
         }
