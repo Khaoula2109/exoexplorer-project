@@ -110,7 +110,9 @@ pipeline {
         
         stage('Update Kubernetes Deployments') {
     steps {
-        sh '''
+       withCredentials([file(credentialsId: 'exoexplorer-kubeconfig', variable: 'KCONF')]) {
+            sh '''
+            export KUBECONFIG=$KCONF
         # Télécharge kubectl s'il n'existe pas déjà
         if ! command -v kubectl &> /dev/null; then
             curl -LO "https://dl.k8s.io/release/$(curl -Ls https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
