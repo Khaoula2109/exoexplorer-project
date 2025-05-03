@@ -135,8 +135,8 @@ pipeline {
             # 3) Applique les manifestes sur le cluster
             #––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
             kubectl apply -f kubernetes/namespace.yaml
-            kubectl apply -f kubernetes/db-secrets.yaml
-            kubectl apply -f kubernetes/oracle-wallet-configmap.yaml
+            kubectl apply -f kubernetes/secrets.yaml
+            kubectl apply -f kubernetes/wallet-configmap.yaml
             kubectl apply -f kubernetes/backend-deployment.yaml
             kubectl apply -f kubernetes/frontend-deployment.yaml
             kubectl apply -f kubernetes/ingress.yaml
