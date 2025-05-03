@@ -22,8 +22,8 @@ spec:
     spec:
       volumes:
         - name: oracle-wallet
-          configMap:
-            name: oracle-wallet-config
+          secret:
+            secretName: oracle-wallet-secret
       containers:
         - name: exoexplorer-backend
           image: khaoula2109/exoexplorer-backend:latest

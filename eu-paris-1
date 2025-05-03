@@ -1,0 +1,7 @@
+[DEFAULT]
+user=ocid1.user.oc1..aaaaaaaaewfmuudvxwff7kpe45xfl4yi3obffu6mdjrtuadpxfoz2mmv6p6a
+fingerprint=68:94:b7:72:83:75:69:e4:d1:ab:74:cc:bc:b0:e5:bf
+key_file=/home/khaoula-ouazri/.oci/mine.pem
+tenancy=ocid1.tenancy.oc1..aaaaaaaazyzik3zxw3q45tkwf2i243gagiz7rbesdo4etdaeqm2zxtgg4mvq
+region=eu-paris-1
+pass_phrase=khaoula
