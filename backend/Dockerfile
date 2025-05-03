@@ -6,7 +6,7 @@ WORKDIR /app
 COPY target/exoExplorer-0.0.1-SNAPSHOT.jar app.jar
 
 # Copier le wallet Oracle
-COPY src/main/resources/Wallet_exoExplorerDB /app/Wallet_exoExplorerDB
+#COPY src/main/resources/Wallet_exoExplorerDB /app/Wallet_exoExplorerDB
 
 # Variable d'environnement pour le chemin du wallet
 ENV TNS_ADMIN=/app/Wallet_exoExplorerDB
