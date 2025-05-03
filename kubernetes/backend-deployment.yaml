@@ -69,11 +69,11 @@ spec:
         env:
         - name: TNS_ADMIN
         
-  	  value: /app/Wallet_exoExplorerDB
+  	  value: "/app/Wallet_exoExplorerDB"
   	  
  	 - name: SPRING_DATASOURCE_URL
  	 
- 	   value: jdbc:oracle:thin:@exoexplorerdb_low?TNS_ADMIN=/app/Wallet_exoExplorerDB
+ 	   value: "jdbc:oracle:thin:@exoexplorerdb_low?TNS_ADMIN=/app/Wallet_exoExplorerDB"
 
         - name: SPRING_DATASOURCE_USERNAME
 
