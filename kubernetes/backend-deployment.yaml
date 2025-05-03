@@ -44,6 +44,8 @@ spec:
             - name: SPRING_DATASOURCE_URL
               value: >-
                 jdbc:oracle:thin:@exoexplorerdb_low?TNS_ADMIN=/app/Wallet_exoExplorerDB
+            - name: JAVA_TOOL_OPTIONS
+              value: "-Doracle.net.tns_admin=/app/Wallet_exoExplorerDB"
             - name: SPRING_DATASOURCE_USERNAME
               value: ADMIN
             - name: SPRING_DATASOURCE_PASSWORD
