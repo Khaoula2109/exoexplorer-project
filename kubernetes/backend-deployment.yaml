@@ -1,182 +1,96 @@
-apiVersion: apps/v1
-
-kind: Deployment
-
-metadata:
-
-  name: exoexplorer-backend
-
-  namespace: exoexplorer
-
-  labels:
-
-    app: exoexplorer-backend
-
-spec:
-
-  replicas: 2
-
-  selector:
-
-    matchLabels:
-
-      app: exoexplorer-backend
-
-  template:
-
-    metadata:
-
-      labels:
-
-        app: exoexplorer-backend
-
-      annotations:
-
-        prometheus.io/scrape: "true"
-
-        prometheus.io/path: "/actuator/prometheus"
-
-        prometheus.io/port: "8080"
-
-    spec:
-
-      containers:
-
-      - name: exoexplorer-backend
-
-        image: khaoula2109/exoexplorer-backend:latest
-
-        imagePullPolicy: Always
-
-        ports:
-
-        - containerPort: 8080
-
-        resources:
-
-          limits:
-
-            cpu: "1"
-
-            memory: "1Gi"
-
-          requests:
-
-            cpu: "500m"
-
-            memory: "512Mi"
-
-        env:
-        - name: TNS_ADMIN
-        
-  	  value: "/app/Wallet_exoExplorerDB"
-  	  
- 	 - name: SPRING_DATASOURCE_URL
- 	 
- 	   value: "jdbc:oracle:thin:@exoexplorerdb_low?TNS_ADMIN=/app/Wallet_exoExplorerDB"
-
-        - name: SPRING_DATASOURCE_USERNAME
-
-          value: "ADMIN"
-
-        - name: SPRING_DATASOURCE_PASSWORD
-
-          value: "Khaoula2109_"
-
-        - name: JASYPT_ENCRYPTOR_PASSWORD
-
-          valueFrom:
-
-            secretKeyRef:
-
-              name: db-secrets
-
-              key: jasypt-password
-
-        - name: SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_SECRET
-
-          valueFrom:
-
-            secretKeyRef:
-
-              name: db-secrets
-
-              key: jwt-secret
-
-        - name: SPRING_MAIL_PASSWORD
-
-          valueFrom:
-
-            secretKeyRef:
-
-              name: db-secrets
-
-              key: spring-mail-password
-
-        volumeMounts:
-
-        - name: oracle-wallet
-
-          mountPath: /app/Wallet_exoExplorerDB
-
-        livenessProbe:
-
-          httpGet:
-
-            path: /actuator/health
-
-            port: 8080
-
-          initialDelaySeconds: 60
-
-          periodSeconds: 15
-
-          timeoutSeconds: 5
-
-        readinessProbe:
-
-          httpGet:
-
-            path: /actuator/health
-
-            port: 8080
-
-          initialDelaySeconds: 30
-
-          periodSeconds: 10
-
-          timeoutSeconds: 5
-
-      volumes:
-
-      - name: oracle-wallet
-
-        configMap:
-
-          name: oracle-wallet-config
-
 ---
-
-apiVersion: v1
-
-kind: Service
-
+apiVersion: apps/v1
+kind: Deployment
 metadata:
-
-  name: exoexplorer-backend-service
-
+  name: exoexplorer-backend
   namespace: exoexplorer
-
-spec:
-
-  selector:
-
+  labels:
     app: exoexplorer-backend
-
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: exoexplorer-backend
+  template:
+    metadata:
+      labels:
+        app: exoexplorer-backend
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/path: "/actuator/prometheus"
+        prometheus.io/port: "8080"
+    spec:
+      volumes:
+        - name: oracle-wallet
+          configMap:
+            name: oracle-wallet-config
+      containers:
+        - name: exoexplorer-backend
+          image: khaoula2109/exoexplorer-backend:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+          resources:
+            limits:
+              cpu: "1"
+              memory: 1Gi
+            requests:
+              cpu: 500m
+              memory: 512Mi
+          env:
+            # ----- Oracle connection -----
+            - name: TNS_ADMIN
+              value: /app/Wallet_exoExplorerDB
+            - name: SPRING_DATASOURCE_URL
+              value: >-
+                jdbc:oracle:thin:@exoexplorerdb_low?TNS_ADMIN=/app/Wallet_exoExplorerDB
+            - name: SPRING_DATASOURCE_USERNAME
+              value: ADMIN
+            - name: SPRING_DATASOURCE_PASSWORD
+              value: ENC(LeqdGbWzkLI3TrxGbtlcoruXFKMvRnvM)
+            # ----- Other secrets -----
+            - name: JASYPT_ENCRYPTOR_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: db-secrets
+                  key: jasypt-password
+            - name: SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: db-secrets
+                  key: jwt-secret
+            - name: SPRING_MAIL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: db-secrets
+                  key: spring-mail-password
+          volumeMounts:
+            - name: oracle-wallet
+              mountPath: /app/Wallet_exoExplorerDB
+          livenessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8080
+            initialDelaySeconds: 60
+            periodSeconds: 15
+            timeoutSeconds: 5
+          readinessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: exoexplorer-backend-service
+  namespace: exoexplorer
+spec:
+  selector:
+    app: exoexplorer-backend
   ports:
-
-  - port: 8080
-
-    targetPort: 8080
-
+    - port: 8080
+      targetPort: 8080
   type: ClusterIP
