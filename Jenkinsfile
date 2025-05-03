@@ -7,6 +7,7 @@ pipeline {
         DOCKERHUB_USERNAME = "khaoula2109"
         PATH = "$PATH:/var/jenkins_home/.nvm/versions/node/v18.18.0/bin"
         DOCKER_HOST = "tcp://localhost:2375"  // Configuration du Docker host
+        DOCKER_PATH = "/usr/bin/docker"       // Chemin complet vers l'exécutable Docker
     }
     
     stages {
@@ -63,8 +64,14 @@ pipeline {
             steps {
                 sh '''
                 # Vérifiez que Docker est accessible
-                docker version
-                docker info
+                echo "Vérification de Docker avec le chemin complet"
+                ${DOCKER_PATH} --version || echo "Docker n'est pas accessible avec le chemin complet"
+                
+                # Tester avec d'autres chemins possibles
+                /usr/local/bin/docker --version || echo "Docker n'est pas accessible dans /usr/local/bin"
+                
+                # Rechercher où Docker est installé
+                find / -name docker -type f -executable 2>/dev/null || echo "Docker non trouvé dans le système de fichiers"
                 '''
             }
         }
@@ -73,15 +80,15 @@ pipeline {
             steps {
                 sh '''
                 # Construction des images Docker
-                docker build -t ${DOCKERHUB_USERNAME}/exoexplorer-frontend:${VERSION} ./frontend
-                docker build -t ${DOCKERHUB_USERNAME}/exoexplorer-backend:${VERSION} ./backend
+                ${DOCKER_PATH} build -t ${DOCKERHUB_USERNAME}/exoexplorer-frontend:${VERSION} ./frontend
+                ${DOCKER_PATH} build -t ${DOCKERHUB_USERNAME}/exoexplorer-backend:${VERSION} ./backend
                 
                 # Création des tags "latest"
-                docker tag ${DOCKERHUB_USERNAME}/exoexplorer-frontend:${VERSION} ${DOCKERHUB_USERNAME}/exoexplorer-frontend:latest
-                docker tag ${DOCKERHUB_USERNAME}/exoexplorer-backend:${VERSION} ${DOCKERHUB_USERNAME}/exoexplorer-backend:latest
+                ${DOCKER_PATH} tag ${DOCKERHUB_USERNAME}/exoexplorer-frontend:${VERSION} ${DOCKERHUB_USERNAME}/exoexplorer-frontend:latest
+                ${DOCKER_PATH} tag ${DOCKERHUB_USERNAME}/exoexplorer-backend:${VERSION} ${DOCKERHUB_USERNAME}/exoexplorer-backend:latest
                 
                 # Liste des images pour vérification
-                docker images | grep ${DOCKERHUB_USERNAME}
+                ${DOCKER_PATH} images | grep ${DOCKERHUB_USERNAME}
                 '''
             }
         }
@@ -90,13 +97,13 @@ pipeline {
             steps {
                 sh '''
                 # Connexion à Docker Hub
-                echo $DOCKER_HUB_CREDS_PSW | docker login -u $DOCKER_HUB_CREDS_USR --password-stdin
+                echo $DOCKER_HUB_CREDS_PSW | ${DOCKER_PATH} login -u $DOCKER_HUB_CREDS_USR --password-stdin
                 
                 # Push des images vers Docker Hub
-                docker push ${DOCKERHUB_USERNAME}/exoexplorer-frontend:${VERSION}
-                docker push ${DOCKERHUB_USERNAME}/exoexplorer-backend:${VERSION}
-                docker push ${DOCKERHUB_USERNAME}/exoexplorer-frontend:latest
-                docker push ${DOCKERHUB_USERNAME}/exoexplorer-backend:latest
+                ${DOCKER_PATH} push ${DOCKERHUB_USERNAME}/exoexplorer-frontend:${VERSION}
+                ${DOCKER_PATH} push ${DOCKERHUB_USERNAME}/exoexplorer-backend:${VERSION}
+                ${DOCKER_PATH} push ${DOCKERHUB_USERNAME}/exoexplorer-frontend:latest
+                ${DOCKER_PATH} push ${DOCKERHUB_USERNAME}/exoexplorer-backend:latest
                 '''
             }
         }
@@ -131,7 +138,7 @@ pipeline {
             steps {
                 sh '''
                 # Nettoyage des images locales pour économiser de l'espace disque
-                docker system prune -af --volumes || true
+                ${DOCKER_PATH} system prune -af --volumes || true
                 '''
                 cleanWs()
             }
