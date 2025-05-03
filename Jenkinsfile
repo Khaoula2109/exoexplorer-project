@@ -110,31 +110,42 @@ pipeline {
         
         stage('Update Kubernetes Deployments') {
     steps {
-       withCredentials([file(credentialsId: 'exoexplorer-kubeconfig', variable: 'KCONF')]) {
+        /* Charge le kubeconfig sécurisé dans $KCONF */
+        withCredentials([file(credentialsId: 'exoexplorer-kubeconfig', variable: 'KCONF')]) {
+
             sh '''
-            export KUBECONFIG=$KCONF
-        # Télécharge kubectl s'il n'existe pas déjà
-        if ! command -v kubectl &> /dev/null; then
-            curl -LO "https://dl.k8s.io/release/$(curl -Ls https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
-            chmod +x kubectl
-            export PATH=$PATH:$PWD     # <-- ajoute kubectl du workspace
-        fi
+            #––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
+            # 1) Prépare kubectl dans le PATH du job (pas besoin de sudo)
+            #––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
+            export KUBECONFIG="$KCONF"
 
-        # Mise à jour des manifestes
-        sed -i "s|image: ${DOCKERHUB_USERNAME}/exoexplorer-backend:.*|image: ${DOCKERHUB_USERNAME}/exoexplorer-backend:${VERSION}|" kubernetes/backend-deployment.yaml
-        sed -i "s|image: ${DOCKERHUB_USERNAME}/exoexplorer-frontend:.*|image: ${DOCKERHUB_USERNAME}/exoexplorer-frontend:${VERSION}|" kubernetes/frontend-deployment.yaml
+            if ! command -v kubectl >/dev/null 2>&1; then
+                curl -LO "https://dl.k8s.io/release/$(curl -Ls https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+                chmod +x kubectl
+                export PATH="$PATH:$PWD"
+            fi
 
-        # Déploiement sur Kubernetes
-        kubectl apply -f kubernetes/namespace.yaml
-        kubectl apply -f kubernetes/db-secrets.yaml
-        kubectl apply -f kubernetes/oracle-wallet-configmap.yaml
-        kubectl apply -f kubernetes/backend-deployment.yaml
-        kubectl apply -f kubernetes/frontend-deployment.yaml
-        kubectl apply -f kubernetes/ingress.yaml
-        kubectl apply -f kubernetes/hpa.yaml
-        '''
+            #––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
+            # 2) Remplace les tags d’image par le numéro BUILD_NUMBER
+            #––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
+            sed -i "s|image: ${DOCKERHUB_USERNAME}/exoexplorer-backend:.*|image: ${DOCKERHUB_USERNAME}/exoexplorer-backend:${VERSION}|" kubernetes/backend-deployment.yaml
+            sed -i "s|image: ${DOCKERHUB_USERNAME}/exoexplorer-frontend:.*|image: ${DOCKERHUB_USERNAME}/exoexplorer-frontend:${VERSION}|" kubernetes/frontend-deployment.yaml
+
+            #––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
+            # 3) Applique les manifestes sur le cluster
+            #––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
+            kubectl apply -f kubernetes/namespace.yaml
+            kubectl apply -f kubernetes/db-secrets.yaml
+            kubectl apply -f kubernetes/oracle-wallet-configmap.yaml
+            kubectl apply -f kubernetes/backend-deployment.yaml
+            kubectl apply -f kubernetes/frontend-deployment.yaml
+            kubectl apply -f kubernetes/ingress.yaml
+            kubectl apply -f kubernetes/hpa.yaml
+            '''
+        }
     }
-}        
+}
+
         stage('Cleanup') {
             steps {
                 sh '''
