@@ -67,6 +67,13 @@ spec:
             memory: "512Mi"
 
         env:
+        - name: TNS_ADMIN
+        
+  	  value: /app/Wallet_exoExplorerDB
+  	  
+ 	 - name: SPRING_DATASOURCE_URL
+ 	 
+ 	   value: jdbc:oracle:thin:@exoexplorerdb_low?TNS_ADMIN=/app/Wallet_exoExplorerDB
 
         - name: SPRING_DATASOURCE_USERNAME
 
@@ -74,7 +81,7 @@ spec:
 
         - name: SPRING_DATASOURCE_PASSWORD
 
-          value: "ENC(LeqdGbWzkLI3TrxGbtlcoruXFKMvRnvM)"
+          value: "Khaoula2109_"
 
         - name: JASYPT_ENCRYPTOR_PASSWORD
 
