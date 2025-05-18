@@ -15,7 +15,7 @@ object FullUserScenario {
       session.set("exoIdParsed", session("exoId").as[String].toInt)
     }
 
-    // 1. Inscription
+    // 1. Registration
     .exec(http("Signup")
       .post("/api/auth/signup")
       .header("Content-Type", "application/json")
@@ -23,11 +23,9 @@ object FullUserScenario {
         s"""{ "email": "${session("email").as[String]}", "password": "${session("password").as[String]}" }"""
       )).asJson
       .check(status.in(200, 409)))
-    // Ne pas sortir immédiatement en cas d'erreur d'inscription (statut 409 = utilisateur existe déjà)
-    // .exitHereIfFailed - Retiré pour éviter les problèmes en cas d'utilisateur déjà existant
     .pause(1)
 
-    // 2. Connexion
+    // 2. Connection
     .exec(http("Login")
       .post("/api/auth/login")
       .header("Content-Type", "application/json")
@@ -38,7 +36,7 @@ object FullUserScenario {
       .check(jsonPath("$.otp").optional.saveAs("otp")))
     .exitHereIfFailed
 
-    // 3. Vérification OTP
+    // 3. OTP Verification
     .exec(http("Verify OTP")
       .post("/api/auth/verify-otp")
       .header("Content-Type", "application/json")
@@ -53,26 +51,26 @@ object FullUserScenario {
       .check(jsonPath("$.token").saveAs("jwt")))
     .exitHereIfFailed
 
-    // Étape cruciale: s'assurer que jwt est disponible pour les étapes suivantes
+    // Crucial step: ensure jwt is available for the next steps
     .exec(session => {
       if (!session.contains("jwt")) {
-        // Si JWT non obtenu de l'API, générer un JWT de secours
+        // If JWT not obtained from API, generate fallback JWT
         val email = session("email").as[String]
-        println(s"⚠️ Generating fallback JWT for $email since no JWT was received from API")
+        println(s" Generating fallback JWT for $email since no JWT was received from API")
         session.set("jwt", JwtUtil.token(email))
       } else {
         session
       }
     })
 
-    // 4. Récupération du profil
+    // 4. Getting the user profile
     .exec(http("Get Profile")
       .get(session => s"/api/user/profile?email=${session("email").as[String]}")
       .header("Authorization", session => s"Bearer ${session("jwt").as[String]}")
       .check(status.is(200)))
     .pause(200.millis)
 
-    // 5. Ajout aux favoris
+    // 5. Adding to favorites
     .doIf(session => session.contains("exoIdParsed")) {
       exec(http("Toggle Favorite")
         .post("/api/user/toggle-favorite")
@@ -85,7 +83,7 @@ object FullUserScenario {
     }
     .pause(200.millis)
 
-    // 6. Mise à jour des préférences
+    // 6. Update preferences
     .exec(http("Update Preferences")
       .put("/api/user/preferences")
       .header("Authorization", session => s"Bearer ${session("jwt").as[String]}")
@@ -98,16 +96,16 @@ object FullUserScenario {
       .check(status.is(200)))
     .pause(300.millis)
 
-    // 7. Récupération des favoris
+    // 7. Loading favorites
     .exec(http("Get Favorites")
       .get("/api/user/favorites")
       .header("Authorization", session => s"Bearer ${session("jwt").as[String]}")
       .check(status.is(200)))
     .pause(200.millis)
 
-    // 8. Explorer les exoplanètes
+    // 8. Exploring exoplanets
     .exec(session => {
-      // Générer un paramètre de filtrage aléatoire
+      // Generate a random filter parameter
       val randomParams = Feeder.getRandomFilterParams()
       val queryParams = Feeder.mapToQueryString(randomParams)
       session.set("queryParams", queryParams)
@@ -129,7 +127,7 @@ object FullUserScenario {
     )
     .pause(300.millis)
 
-    // 9. Consulter les détails d'une exoplanète (si ID trouvé)
+    // 9. View details of an exoplanet (if ID found)
     .doIf(session => session.contains("randomExoId")) {
       exec(
         http("View Exoplanet Details")
@@ -140,7 +138,7 @@ object FullUserScenario {
     }
     .pause(200.millis)
 
-    // 10. Génération de codes de secours (pour certains utilisateurs)
+    // 10. Generation of backup codes (for some users)
     .randomSwitch(
       25.0 -> exec(
         http("Generate Backup Codes")

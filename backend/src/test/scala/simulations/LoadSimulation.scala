@@ -8,35 +8,35 @@ import simulations.helpers.Protocol
 import scala.concurrent.duration._
 
 /**
- * LoadSimulation - Test de charge normal
- * Simule une utilisation réaliste de l'application avec une charge croissante
- * pour évaluer la performance sous une charge normale élevée
+ * LoadSimulation - Normal Load Test
+ * Simulates realistic application usage with increasing load
+ * to evaluate performance under normal high load
  */
 class LoadSimulation extends Simulation {
 
-  // Définition des scénarios
+  // Definition of scenarios
   val fullUserScenario = FullUserScenario.builder
   val authScenario = AuthenticationScenario.builder
   val exoScenario = ExoplanetScenario.builder
   val profileScenario = UserProfileScenario.builder
   val adminScenario = DataLoaderScenario.builder
 
-  // Simulation d'un nombre croissant d'utilisateurs
+  // Simulation of an increasing number of users
   setUp(
-    // Scénario complet - utilisateurs principaux
+    // Complete scenario - main users
     fullUserScenario
       .inject(
-        rampUsers(500).during(5.minutes) // Nombre d'utilisateurs rampants pendant 5 minutes
+        rampUsers(500).during(5.minutes) // Number of crawling users for 5 minutes
       ),
 
-    // Authentification seule - nouveaux utilisateurs
+    // Authentication only - new users
     authScenario
       .inject(
         nothingFor(30.seconds),
         rampUsers(300).during(4.minutes)
       ),
 
-    // Navigation exoplanètes - utilisateurs qui explorent
+    // Exoplanet Navigation - Users Exploring
     exoScenario
       .inject(
         nothingFor(1.minute),
@@ -68,7 +68,7 @@ class LoadSimulation extends Simulation {
       global.responseTime.mean.lt(2000),
       global.successfulRequests.percent.gte(80),
 
-      // Vérifications spécifiques par type d'opération
+      // Specific checks by type of operation
       details("Toggle favourite").responseTime.percentile3.lt(2000),
       details("GET exoplanet details").responseTime.mean.lt(1000),
       details("GET summary").successfulRequests.percent.is(80)

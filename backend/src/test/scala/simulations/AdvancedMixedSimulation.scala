@@ -7,13 +7,13 @@ import simulations.helpers.Protocol
 import scala.concurrent.duration._
 
 /**
- * AdvancedMixedSimulation - Simulation réaliste mixant différents profils d'utilisateurs
- * Cette simulation contient des scénarios variés représentant un usage réel
- * de l'application avec des proportions réalistes entre les différents types d'utilisateurs
+ * AdvancedMixedSimulation - Realistic simulation mixing different user profiles
+ * This simulation contains various scenarios representing real-life usage
+ * of the application, with realistic proportions between different user types
  */
 class AdvancedMixedSimulation extends Simulation {
 
-  // Définition des scénarios
+  // Definition of scenarios
   val fullUserScenario = FullUserScenario.builder
   val authScenario = AuthenticationScenario.builder
   val exoScenario = ExoplanetScenario.builder
@@ -27,7 +27,7 @@ class AdvancedMixedSimulation extends Simulation {
   val steadyStateTime = testDuration.minus(rampUpTime).minus(rampDownTime)
 
   setUp(
-    // 1. Nouveaux utilisateurs s'inscrivant et se connectant (20%)
+    // 1. New users registering and logging in (20%)
     authScenario
       .inject(
         rampUsersPerSec(1).to(10).during(rampUpTime),
@@ -35,7 +35,7 @@ class AdvancedMixedSimulation extends Simulation {
         rampUsersPerSec(10).to(1).during(rampDownTime)
       ),
 
-    // 2. Utilisateurs parcourant le catalogue d'exoplanètes (40%)
+    // 2. Users browsing the exoplanet catalog (40%)
     exoScenario
       .inject(
         nothingFor(30.seconds),
@@ -44,7 +44,7 @@ class AdvancedMixedSimulation extends Simulation {
         rampUsersPerSec(20).to(1).during(rampDownTime)
       ),
 
-    // 3. Utilisateurs gérant leur profil et favoris (15%)
+    // 3. Users managing their profile and favorites (15%)
     profileScenario
       .inject(
         nothingFor(1.minute),
@@ -53,7 +53,7 @@ class AdvancedMixedSimulation extends Simulation {
         rampUsersPerSec(7.5).to(1).during(rampDownTime)
       ),
 
-    // 4. Utilisateurs effectuant un parcours complet (25%)
+    // 4. Users completing a complete journey (25%)
     fullUserScenario
       .inject(
         rampUsersPerSec(1).to(12.5).during(rampUpTime),
@@ -61,7 +61,7 @@ class AdvancedMixedSimulation extends Simulation {
         rampUsersPerSec(12.5).to(1).during(rampDownTime)
       ),
 
-    // 5. Administrateurs effectuant des opérations de maintenance (<1%)
+    // 5.  Administrators performing maintenance operations (<1%)
     adminScenario
       .inject(
         nothingFor(2.minutes),
@@ -76,12 +76,12 @@ class AdvancedMixedSimulation extends Simulation {
   )
     .protocols(Protocol.httpProtocol)
     .assertions(
-      // Assertions générales
+      // General assertions
       global.responseTime.mean.lt(3000),
       global.responseTime.percentile3.lt(2000),
       global.successfulRequests.percent.gte(80),
 
-      // Assertions spécifiques aux opérations critiques
+      // Assertions specific to critical operations
       details("Verify OTP").responseTime.percentile3.lt(5000),
       details("Login").successfulRequests.percent.gte(80),
       details("GET summary").responseTime.mean.lt(2000),

@@ -23,11 +23,9 @@ object AuthenticationScenario {
         .body(StringBody(session =>
           s"""{ "email": "${session("email").as[String]}", "password": "${session("password").as[String]}" }"""
         )).asJson
-        .check(status.in(200, 409)) // Accepter 409 si l'utilisateur existe déjà
+        .check(status.in(200, 409)) // We accept 409 if the user already exists
         .check(bodyString.saveAs("signupResponseBody"))
     )
-    // Ne pas échouer si l'inscription retourne 409 (utilisateur existe déjà)
-    // .exitHereIfFailed - Retiré pour éviter les problèmes en cas d'utilisateur déjà existant
     .exec { session =>
       println("\n=== Signup Response ===")
       println(session("signupResponseBody").as[String])
@@ -45,7 +43,7 @@ object AuthenticationScenario {
         .check(jsonPath("$.otp").optional.saveAs("otp"))
         .check(bodyString.saveAs("loginResponseBody"))
     )
-    .exitHereIfFailed // Si la connexion échoue, arrêter le scénario
+    .exitHereIfFailed // If the connection fails, stop the scenario
     .exec { session =>
       println("\n=== Login Response ===")
       println(session("loginResponseBody").as[String])
@@ -59,15 +57,15 @@ object AuthenticationScenario {
         .body(StringBody(session => {
           val otp = session.contains("otp") match {
             case true => session("otp").as[String]
-            case false => "000000" // valeur par défaut si otp absent
+            case false => "000000" // default value if otp absent
           }
           s"""{ "email": "${session("email").as[String]}", "otp": "$otp" }"""
         })).asJson
         .check(status.is(200))
-        .check(jsonPath("$.token").saveAs("jwt")) // Récupération du token
+        .check(jsonPath("$.token").saveAs("jwt")) // Retrieving the token
         .check(bodyString.saveAs("verifyOtpResponseBody"))
     )
-    .exitHereIfFailed // Si la vérification OTP échoue, arrêter le scénario
+    .exitHereIfFailed // If OTP verification fails, stop the scenario
     .exec { session =>
       println("\n=== Verify OTP Response ===")
       println(session("verifyOtpResponseBody").as[String])
@@ -75,10 +73,10 @@ object AuthenticationScenario {
       session
     }
 
-    // S'assurer que le JWT est disponible même en cas d'échec de l'API
+    // Ensure the JWT is available even if the API fails
     .exec(session => {
       if (!session.contains("jwt")) {
-        // Générer un JWT de secours si l'API n'en a pas fourni
+        // Generate a fallback JWT if the API did not provide one
         val email = session("email").as[String]
         println(s"⚠️ Generating fallback JWT for $email since no JWT was received from API")
         session.set("jwt", JwtUtil.token(email))
@@ -87,7 +85,7 @@ object AuthenticationScenario {
       }
     })
 
-    // Ajout de génération de backup codes
+    // Added backup code generation
     .randomSwitch(
       40.0 -> exec(
         http("Generate Backup Codes")
@@ -106,7 +104,7 @@ object AuthenticationScenario {
           println(session("backupCodesResponse").as[String])
           session
         }
-        // Tester l'utilisation d'un backup code si un a été généré
+        // Test the use of a backup code if one has been generated
         .doIf(session => session.contains("backupCode")) {
           exec(
             http("Verify Backup Code")

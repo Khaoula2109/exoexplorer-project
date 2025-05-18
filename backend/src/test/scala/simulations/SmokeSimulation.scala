@@ -6,41 +6,41 @@ import simulations.helpers.JwtUtil
 import scala.concurrent.duration._
 
 /**
- * Test de fumée optimisé avec assertions assouplies
- * pour identifier tous les problèmes sans échec immédiat
+ * Optimized smoke testing with relaxed assertions
+ * to identify all issues without immediate failure
  */
 class SmokeSimulation extends Simulation {
 
-  // Configuration HTTP avec timeouts augmentés
+  // HTTP configuration with increased timeouts
   val httpProtocol = http
     .baseUrl("http://localhost:8080")
     .acceptHeader("application/json")
     .contentTypeHeader("application/json")
     .userAgentHeader("Gatling/3.13.5 Performance Test")
-    .disableCaching // Désactiver le cache pour tester les performances réelles
-    .warmUp("http://localhost:8080/actuator/health") // Warmup avant de commencer
+    .disableCaching // Disable cache to test real performance
+    .warmUp("http://localhost:8080/actuator/health") // Warm up before starting
 
-  // Utilisateur de test - utiliser un utilisateur existant
+  // Test user - we can use an existing user
   val testEmail = "user1@example.com"
   val testPassword = "password1"
   val adminEmail = "admin@exoexplorer.com"
 
-  // Scénario pour le test de fumée avec assertions assouplies
+  // Scenario for smoke testing with relaxed assertions
   val scn = scenario("Test de fumée minimal")
-    // Configuration de l'utilisateur
+    // User configuration
     .exec(session => session
       .set("email", testEmail)
       .set("password", testPassword)
       .set("adminEmail", adminEmail)
     )
 
-    // Étape 0: Pré-génération de tokens JWT pour les tests
+    // Step 0: Pre-generate JWT tokens for testing
     .exec(session => {
-      // Générer un JWT utilisateur et admin à l'avance
+      // Generate a user and admin JWT in advance
       val userJwt = JwtUtil.token(testEmail)
       val adminJwt = JwtUtil.adminToken(adminEmail)
 
-      // Afficher les informations des tokens pour débogage
+      // Display token information for debugging
       println(s"User JWT generated for $testEmail")
       JwtUtil.printJwtContent(userJwt)
       println(s"Admin JWT generated for $adminEmail")
@@ -49,7 +49,7 @@ class SmokeSimulation extends Simulation {
       session.set("jwt", userJwt).set("adminJwt", adminJwt)
     })
 
-    // Étape 1: Inscription (accepte 409 si l'utilisateur existe déjà)
+    // Step 1: Registration (accepts 409 if user already exists)
     .exec(
       http("Signup")
         .post("/api/auth/signup")
@@ -57,11 +57,11 @@ class SmokeSimulation extends Simulation {
           s"""{"email":"${testEmail}","password":"${testPassword}"}"""
         )).asJson
         .check(status.in(200, 409))
-        .requestTimeout(10.seconds) // Timeout augmenté
+        .requestTimeout(10.seconds) // Timeout increased
     )
-    .pause(2.seconds) // Pause plus longue
+    .pause(2.seconds) // Longer break
 
-    // Étape 2: Connexion
+    // Step 2: Login
     .exec(
       http("Login")
         .post("/api/auth/login")
@@ -70,13 +70,13 @@ class SmokeSimulation extends Simulation {
         )).asJson
         .check(status.is(200))
         .check(jsonPath("$.otp").optional.saveAs("otp"))
-        .requestTimeout(10.seconds) // Timeout augmenté
+        .requestTimeout(10.seconds) // Timeout increased
     )
-    .pause(2.seconds) // Pause plus longue
+    .pause(2.seconds) // Longer break
 
-    // Étape 3: Vérification OTP
+    // Step 3: OTP Verification
     .exec(session => {
-      // Utiliser OTP reçu ou "000000" par défaut
+      // Use OTP received or "000000" by default
       val otp = session.contains("otp") match {
         case true =>
           println(s"Using received OTP: ${session("otp").as[String]}")
@@ -95,11 +95,11 @@ class SmokeSimulation extends Simulation {
         )).asJson
         .check(status.is(200))
         .check(jsonPath("$.token").optional.saveAs("apiJwt"))
-        .requestTimeout(10.seconds) // Timeout augmenté
+        .requestTimeout(10.seconds) // Longer Timeout
     )
     .pause(1.seconds)
 
-    // Étape 4: Utilisation du JWT reçu de l'API ou du JWT pré-généré
+    // Step 4: Using the JWT received from the API or the pre-generated JWT
     .exec(session => {
       if (session.contains("apiJwt")) {
         val receivedJwt = session("apiJwt").as[String]
@@ -111,13 +111,13 @@ class SmokeSimulation extends Simulation {
       }
     })
 
-    // Étape 5: Récupération des exoplanètes (test d'API protégée)
+    // Step 5: Retrieving Exoplanets (Protected API Test)
     .exec(
       http("GET summary")
         .get("/api/exoplanets/summary")
         .header("Authorization", session => s"Bearer ${session("jwt").as[String]}")
         .check(status.is(200))
-        .requestTimeout(10.seconds) // Timeout augmenté
+        .requestTimeout(10.seconds)
     )
     .pause(1.second)
 
@@ -126,41 +126,41 @@ class SmokeSimulation extends Simulation {
         .get("/api/exoplanets")
         .header("Authorization", session => s"Bearer ${session("jwt").as[String]}")
         .check(status.is(200))
-        .requestTimeout(10.seconds) // Timeout augmenté
+        .requestTimeout(10.seconds)
     )
     .pause(1.second)
 
-    // Étape 6: Tester une API habitable
+    // Step 6: Test habitable API
     .exec(
       http("GET habitable exoplanets")
         .get("/api/exoplanets/habitable")
         .header("Authorization", session => s"Bearer ${session("jwt").as[String]}")
         .check(status.is(200))
-        .requestTimeout(10.seconds) // Timeout augmenté
+        .requestTimeout(10.seconds)
     )
     .pause(1.second)
 
-    // Étape 7: Tester le profil
+    // Step 7: Test the profile
     .exec(
       http("GET profile")
         .get(session => s"/api/user/profile?email=${session("email").as[String]}")
         .header("Authorization", session => s"Bearer ${session("jwt").as[String]}")
         .check(status.is(200))
-        .requestTimeout(10.seconds) // Timeout augmenté
+        .requestTimeout(10.seconds)
     )
     .pause(1.second)
 
-    // Étape 8: Tester les favoris
+    // Step 8: Test the favorites
     .exec(
       http("GET favorites")
         .get("/api/user/favorites")
         .header("Authorization", session => s"Bearer ${session("jwt").as[String]}")
         .check(status.is(200))
-        .requestTimeout(10.seconds) // Timeout augmenté
+        .requestTimeout(10.seconds)
     )
     .pause(1.second)
 
-    // Étape 9: Tester l'ajout aux favoris
+    // Step 9: Test adding to favorites
     .exec(
       http("Toggle favourite")
         .post("/api/user/toggle-favorite")
@@ -168,24 +168,24 @@ class SmokeSimulation extends Simulation {
         .header("Content-Type", "application/json")
         .body(StringBody("""{ "exoplanetId": 1 }""")).asJson
         .check(status.in(200, 404))
-        .requestTimeout(10.seconds) // Timeout augmenté
+        .requestTimeout(10.seconds)
     )
 
-  // Configuration du test - un seul utilisateur
+  // Test Setup - Single User
   setUp(
     scn.inject(atOnceUsers(1))
   ).protocols(httpProtocol)
     .assertions(
-      // Assertions considérablement assouplies pour diagnostiquer tous les problèmes
-      global.responseTime.max.lt(10000),  // 10 secondes max
-      global.successfulRequests.percent.gt(70), // Au moins 70% de requêtes réussies
+      // Significantly relaxed assertions for diagnosing all problems
+      global.responseTime.max.lt(10000),
+      global.successfulRequests.percent.gt(70),
 
-      // Assertions spécifiques pour les opérations importantes
+      // Specific assertions for significant transactions
       details("Signup").successfulRequests.percent.is(100),
       details("Login").successfulRequests.percent.is(100),
 
-      // Assertion sur le temps de login assouplie
-      details("Login").responseTime.max.lt(5000) // 5 secondes max au lieu de 1.5
+      // Login time assertion relaxed
+      details("Login").responseTime.max.lt(5000)
     )
-    .maxDuration(2.minutes) // Durée maximale pour éviter les tests qui s'éternisent
+    .maxDuration(2.minutes) // Maximum duration to avoid tests that drag on forever
 }

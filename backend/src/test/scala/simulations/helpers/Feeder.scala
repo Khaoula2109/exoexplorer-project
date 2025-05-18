@@ -6,45 +6,45 @@ import io.gatling.core.feeder.FeederBuilder
 object Feeder {
 
   /**
-   * Feeder pour les utilisateurs - charge les données depuis le fichier CSV
+   * Feeder for users - loads data from CSV file
    */
   val userFeeder: FeederBuilder = csv("data/users.csv")
     .transform { case (key, value) => value.trim }
     .circular
 
   /**
-   * Feeder pour les exoplanètes - charge les données depuis le fichier CSV
+   * Exoplanet Feeder - loads data from CSV file
    */
   val exoFeeder: FeederBuilder = csv("data/exoplanets.csv")
     .transform { case (key, value) => value.trim }
     .circular
 
   /**
-   * Feeder pour les backup codes - charge les données depuis le fichier CSV
+   * Backup Code Feeder - loads data from CSV file
    */
   val backupCodesFeeder: FeederBuilder = csv("data/backup_codes.csv")
     .transform { case (key, value) => value.trim }
-    .queue // Utiliser queue au lieu de random
+    .queue
 
   /**
-   * Méthode utilitaire pour obtenir un feeder avec une probabilité de distribution
-   * @param path Chemin vers le fichier CSV
-   * @param randomize Si true, utilise une stratégie aléatoire au lieu de circular
+   * Utility method to obtain a feeder with a distribution probability
+   * @param path Path to the CSV file
+   * @param randomize If true, use a random strategy instead of circular
    */
   def getFeeder(path: String, randomize: Boolean = false): FeederBuilder = {
     val baseFeeder = csv(path)
       .transform { case (key, value) => value.trim }
 
     if (randomize) {
-      baseFeeder.shuffle // Utiliser shuffle au lieu de random
+      baseFeeder.shuffle
     } else {
       baseFeeder.circular
     }
   }
 
   /**
-   * Liste de paramètres de filtrage prédéfinis pour les exoplanètes
-   * Remplace l'ancien filterParamsFeeder qui utilisait head/isEmpty
+   * List of predefined filter parameters for exoplanets
+   * Replaces the old filterParamsFeeder which used head/isEmpty
    */
   val filterParams: Array[Map[String, String]] = Array(
     Map("minTemp" -> "0", "maxTemp" -> "300"),
@@ -52,21 +52,21 @@ object Feeder {
     Map("name" -> "Kepler"),
     Map("minYear" -> "2000", "maxYear" -> "2020"),
     Map("minTemp" -> "180", "maxTemp" -> "310"),
-    Map[String, String]() // Map vide pour les requêtes sans filtres
+    Map[String, String]() // Empty map for queries without filters
   )
 
   /**
-   * Méthode pour obtenir un paramètre de filtrage aléatoire
-   * @return Map de paramètres de filtrage
+   * Method to get a random filter parameter
+   * @return Map of filter parameters
    */
   def getRandomFilterParams(): Map[String, String] = {
     filterParams(util.Random.nextInt(filterParams.length))
   }
 
   /**
-   * Méthode pour convertir une Map de paramètres en chaîne de requête
-   * @param params Map des paramètres
-   * @return Chaîne de requête (ex: "?param1=value1&param2=value2" ou "" si vide)
+   * Method to convert a parameter map to a query string
+   * @param params Map of parameters
+   * @return Query string (e.g., "?param1=value1&param2=value2" or "" if empty)
    */
   def mapToQueryString(params: Map[String, String]): String = {
     if (params.isEmpty) ""

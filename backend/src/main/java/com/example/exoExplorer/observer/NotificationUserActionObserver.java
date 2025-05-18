@@ -62,8 +62,8 @@ public class NotificationUserActionObserver implements UserActionObserver {
                     "Explorez des exoplanètes fascinantes, créez votre liste de favoris et découvrez les merveilles de notre univers.\n\n" +
                     "L'équipe ExoExplorer";
 
-            // Commented out to avoid actually sending emails during development
-            // mailService.sendEmail(user.getEmail(), subject, content);
+            // To avoid sending real emails during development, comment out the line below
+             mailService.sendEmail(user.getEmail(), subject, content);
         } catch (Exception e) {
             logger.error("Failed to send welcome email to: {}", user.getEmail(), e);
         }

@@ -47,14 +47,6 @@ public interface ExoplaneteRepository extends JpaRepository<Exoplanet, Integer>,
     List<Exoplanet> findPotentiallyHabitable();
 
     /**
-     * Find exoplanets discovered in a specific year.
-     *
-     * @param year The year of discovery
-     * @return List of exoplanets discovered in the given year
-     */
-    List<Exoplanet> findByYearDiscovered(Integer year);
-
-    /**
      * Find exoplanets with radius similar to Earth (0.8 to 1.2 Earth radii).
      *
      * @return List of Earth-sized exoplanets
@@ -62,13 +54,4 @@ public interface ExoplaneteRepository extends JpaRepository<Exoplanet, Integer>,
     @Query("SELECT e FROM Exoplanet e WHERE e.radius >= 0.8 AND e.radius <= 1.2")
     List<Exoplanet> findEarthSized();
 
-    /**
-     * Count exoplanets by temperature range.
-     *
-     * @param minTemp The minimum temperature
-     * @param maxTemp The maximum temperature
-     * @return Number of exoplanets in the temperature range
-     */
-    @Query("SELECT COUNT(e) FROM Exoplanet e WHERE e.temperature >= :minTemp AND e.temperature <= :maxTemp")
-    Long countByTemperatureRange(@Param("minTemp") Float minTemp, @Param("maxTemp") Float maxTemp);
 }

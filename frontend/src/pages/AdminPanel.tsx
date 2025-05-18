@@ -108,7 +108,7 @@ const AdminPanel: React.FC = () => {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-        {/* Carte de gestion des données */}
+        {/* Data management card */}
         <div className={`${cardClass} p-6 rounded-lg shadow-lg`}>
           <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
             <Database className="text-blue-500" />
@@ -172,7 +172,7 @@ const AdminPanel: React.FC = () => {
           </div>
         </div>
         
-        {/* Carte d'environnement de test */}
+        {/* Test environment card */}
         <div className={`${cardClass} p-6 rounded-lg shadow-lg`}>
           <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
             <AlertTriangle className="text-amber-500" />
@@ -220,7 +220,7 @@ const AdminPanel: React.FC = () => {
         </div>
       </div>
       
-      {/* Modal de confirmation */}
+      {/* Confirmation modal */}
       {showConfirmModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
           <div className={`${cardClass} rounded-lg shadow-xl max-w-md w-full p-6`}>
@@ -245,7 +245,7 @@ const AdminPanel: React.FC = () => {
         </div>
       )}
       
-      {/* Modal Message */}
+      {/* Message Modal */}
       <ModalMessage
         show={modal.show}
         message={modal.message}

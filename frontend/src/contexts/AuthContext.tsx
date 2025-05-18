@@ -41,7 +41,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const login = async (email: string, password: string) => {
     try {
       await apiService.login({ email, password });
-      // Redirection vers la page verify-otp
+      // Redirect to the verify-otp page
       navigate('/verify-otp', { state: { email } });
     } catch (error) {
       console.error('Erreur lors de la connexion:', error);
@@ -68,12 +68,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (token) {
         localStorage.setItem('token', token);
         
-        // Récupérer les informations du profil
+        // Profile information
         const profileResponse = await apiService.getProfile(email);
         const profile = profileResponse.data;
         
         setUser({
-          id: email, // Utiliser l'email comme ID par défaut
+          id: email, // Used email as default ID
           email,
           firstName: profile.firstName || '',
           lastName: profile.lastName || '',
@@ -98,7 +98,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (token) {
         localStorage.setItem('token', token);
         
-        // Récupérer les informations du profil
+        // Profile information
         const profileResponse = await apiService.getProfile(email);
         const profile = profileResponse.data;
         
@@ -156,6 +156,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
-  if (context === undefined) throw new Error('useAuth must be used within an AuthProvider');
+  if (context === undefined) throw new Error('useAuth doit être utilisé dans un AuthProvider');
   return context;
 };

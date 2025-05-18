@@ -33,7 +33,6 @@ class MailServiceTest {
 
     @BeforeEach
     void setUp() {
-        // Set up dependencies using reflection to match your field injection
         ReflectionTestUtils.setField(mailService, "mailSender", mailSender);
         ReflectionTestUtils.setField(mailService, "templateEngine", templateEngine);
     }
@@ -59,7 +58,7 @@ class MailServiceTest {
     }
 
     @Test
-    void testSendOtpEmail_withThymeleaf() throws MessagingException {
+    void testSendOtpEmail_withThymeleaf() {
         // Given
         String to = "test@example.com";
         String otp = "123456";

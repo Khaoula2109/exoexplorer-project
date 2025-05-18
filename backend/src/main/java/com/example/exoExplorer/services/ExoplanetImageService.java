@@ -78,7 +78,6 @@ public class ExoplanetImageService {
     public String getImageUrl(String exoplanetName) {
         String url = exoplanetImages.getOrDefault(exoplanetName, null);
         if (url == null) {
-            // Try case-insensitive search as a fallback
             for (Map.Entry<String, String> entry : exoplanetImages.entrySet()) {
                 if (entry.getKey().equalsIgnoreCase(exoplanetName)) {
                     return entry.getValue();

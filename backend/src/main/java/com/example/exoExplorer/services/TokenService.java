@@ -27,7 +27,7 @@ public class TokenService {
     @Value("${jwt.secret:MySuperSecretKeyForJWTMySuperSecretKeyForJWT}")
     private String secretKey;
 
-    @Value("${jwt.expiration:3600000}") // 1 hour by default
+    @Value("${jwt.expiration:3600000}") // 1 hour by default, changed it just for development
     private long jwtExpiration;
 
     private SecretKey key;
@@ -52,25 +52,25 @@ public class TokenService {
      * @return The generated JWT token
      */
     public String generateToken(String email) {
-        // Recherchez l'utilisateur pour obtenir ses rôles
+        // Search for the user to get their roles
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
-        // Créez une map pour les claims supplémentaires
+        // Create a map for additional claims
         Map<String, Object> claims = new HashMap<>();
 
-        // Ajoutez les rôles comme claim
+        // Add roles as claim
         List<String> roles = new ArrayList<>();
-        roles.add("ROLE_USER");  // Tous les utilisateurs ont ce rôle
+        roles.add("ROLE_USER");  // All users have this role
 
         if (user.isAdmin()) {
-            roles.add("ROLE_ADMIN");  // Ajoutez le rôle admin si applicable
+            roles.add("ROLE_ADMIN");  // Add the admin role if applicable
         }
 
-        // Ajoutez les rôles aux claims
+        // Add roles to claims
         claims.put("roles", roles);
 
-        // Générez le token avec les claims supplémentaires
+        // Generate the token with the additional claims
         return generateToken(claims, email);
     }
 

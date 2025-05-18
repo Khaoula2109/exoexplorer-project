@@ -19,7 +19,7 @@ const HomePage: React.FC = () => {
 
   return (
     <div className="relative">
-      {/* Hero */}
+      {}
       <div 
         className="absolute inset-0 h-[100vh] bg-cover bg-center bg-no-repeat"
         style={{
@@ -70,7 +70,7 @@ const HomePage: React.FC = () => {
     {t('home.modelsDesc')}
   </p>
 
-  {/* Badge À venir */}
+  {}
   <span className="absolute top-4 right-4 bg-yellow-400 text-black text-xs font-bold px-2 py-1 rounded-full shadow">
     {t('common.comingSoon')}
   </span>

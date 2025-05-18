@@ -27,10 +27,10 @@ const Navbar: React.FC = () => {
         </Link>
         
         <div className="flex items-center space-x-6">
-          {/* Affichage conditionnel basé sur isAdmin et isAuthenticated */}
+          {/* Links for admins only */}
           {isAdmin ? (
             <>
-              {/* Liens pour les administrateurs uniquement */}
+              {/*  */}
               <Link to="/admin" className="flex items-center space-x-1 hover:text-blue-600 dark:hover:text-blue-400">
                 <Shield className="w-5 h-5" />
                 <span>Admin</span>
@@ -46,7 +46,7 @@ const Navbar: React.FC = () => {
             </>
           ) : (
             <>
-              {/* Liens pour les utilisateurs non-admin */}
+              {/* Links for non-admin users */}
               <Link to="/search" className="flex items-center space-x-1 hover:text-blue-600 dark:hover:text-blue-400">
                 <Search className="w-5 h-5" />
                 <span>{t('nav.search')}</span>

@@ -4,14 +4,14 @@
 		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 
 	<!-- =========================================================
-         0. Métadonnées
+         0. Metadata
     ========================================================= -->
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>3.3.9</version>              <!-- dernière 3.3.x à la date du 25-04-2025 -->
+		<version>3.3.9</version>              
 		<relativePath/>
 	</parent>
 
@@ -21,18 +21,18 @@
 	<name>exoExplorer</name>
 
 	<!-- =========================================================
-         1. Propriétés centralisées
+         1. Centralized properties
     ========================================================= -->
 	<properties>
-		<java.version>21</java.version>          <!-- JDK 21 LTS -->
-		<scala.version>2.13.14</scala.version>   <!-- runtime Gatling 3.13.x -->
+		<java.version>21</java.version>
+		<scala.version>2.13.14</scala.version>
 		<gatling.version>3.13.5</gatling.version>
 		<gatling.plugin.version>4.11.0</gatling.plugin.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
 
 	<!-- =========================================================
-         2. Dépendances applicatives
+         2. Application dependencies
     ========================================================= -->
 	<dependencies>
 
@@ -96,7 +96,7 @@
 			<version>21.9.0.0</version>
 		</dependency>
 
-		<!-- - Sécurité / crypto - -->
+		<!-- - Security / crypto - -->
 		<dependency>
 			<groupId>org.springframework.security</groupId>
 			<artifactId>spring-security-crypto</artifactId>
@@ -144,7 +144,7 @@
 		</dependency>
 
 		<!-- =========================================================
-             3. Dépendances de test
+             3. Test dependencies
         ========================================================= -->
 		<!-- JUnit / Mockito / Spring Test -->
 		<dependency>
@@ -177,7 +177,7 @@
 			<scope>test</scope>
 		</dependency>
 
-		<!-- Gatling runtime + rapports -->
+		<!-- Gatling runtime + reports -->
 		<dependency>
 			<groupId>io.gatling</groupId>
 			<artifactId>gatling-app</artifactId>
@@ -211,15 +211,19 @@
 			<artifactId>thymeleaf-extras-java8time</artifactId>
 			<version>3.0.4.RELEASE</version>
 		</dependency>
-		<!-- Micrometer pour Prometheus -->
+		<!-- Micrometer for Prometheus -->
 		<dependency>
 			<groupId>io.micrometer</groupId>
 			<artifactId>micrometer-registry-prometheus</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>com.h2database</groupId>
+			<artifactId>h2</artifactId>
+		</dependency>
 	</dependencies>
 
 	<!-- =========================================================
-         4. Plugins Maven
+         4. Maven Plugins
     ========================================================= -->
 	<build>
 		<plugins>
@@ -240,14 +244,14 @@
 				</configuration>
 			</plugin>
 
-			<!-- Plugin Scala : compile src/test/scala pour Gatling -->
+			<!-- Scala Plugin: compile src/test/scala pour Gatling -->
 			<plugin>
 				<groupId>net.alchim31.maven</groupId>
 				<artifactId>scala-maven-plugin</artifactId>
 				<version>4.9.0</version>
 
 				<executions>
-					<!-- ajoute src/test/scala aux sources de test -->
+					<!-- add src/test/scala to the test sources -->
 					<execution>
 						<id>add-test-scala</id>
 						<phase>generate-test-sources</phase>
@@ -256,7 +260,7 @@
 						</goals>
 					</execution>
 
-					<!-- compile le code Scala des tests -->
+					<!-- compiles the Scala code of the tests -->
 					<execution>
 						<id>compile-scala-tests</id>
 						<phase>test-compile</phase>
@@ -272,7 +276,7 @@
 				<groupId>io.gatling</groupId>
 				<artifactId>gatling-maven-plugin</artifactId>
 				<version>${gatling.plugin.version}</version>
-				<!-- pas de config : le plugin scanne src/test/scala -->
+				<!-- no config: plugin scans src/test/scala -->
 			</plugin>
 
 			<!-- Jacoco -->

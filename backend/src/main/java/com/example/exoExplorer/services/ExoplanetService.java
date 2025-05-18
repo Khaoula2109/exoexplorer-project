@@ -214,21 +214,4 @@ public class ExoplanetService {
         exoplanetRepository.delete(exoplanet);
     }
 
-    /**
-     * Gets potentially habitable exoplanets.
-     *
-     * @return List of potentially habitable exoplanets
-     */
-    public List<Exoplanet> getPotentiallyHabitableExoplanets() {
-        return exoplanetRepository.findPotentiallyHabitable();
-    }
-
-    /**
-     * Gets exoplanets with Earth-like characteristics.
-     *
-     * @return List of Earth-like exoplanets
-     */
-    public List<Exoplanet> getEarthLikeExoplanets() {
-        return exoplanetRepository.findEarthSized();
-    }
 }

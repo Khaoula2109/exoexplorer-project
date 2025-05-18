@@ -78,18 +78,18 @@ class ExoplanetServiceTest {
         dto.setAvgPeriod(310.0);
         dto.setAvgTemp(280.0);
 
-        // Préparation des mocks
+        // Preparing mocks
         when(externalClient.fetchExoplanetData()).thenReturn(List.of(dto));
         when(exoplanetRepository.findByNameIgnoreCase("Kepler-22b")).thenReturn(Optional.of(existing));
 
         // WHEN
         exoplanetService.refreshExoplanetData();
 
-        // THEN - En utilisant un ArgumentCaptor pour capturer l'instance sauvegardée
+        // THEN - Using an ArgumentCaptor to capture the saved instance
         ArgumentCaptor<Exoplanet> exoplanetCaptor = ArgumentCaptor.forClass(Exoplanet.class);
         verify(exoplanetRepository).save(exoplanetCaptor.capture());
 
-        // Vérifier les propriétés de l'exoplanète sauvegardée
+        // Check the properties of the saved exoplanet
         Exoplanet savedExoplanet = exoplanetCaptor.getValue();
         assertEquals("Kepler-22b", savedExoplanet.getName());
         assertEquals(3.1f, savedExoplanet.getRadius(), 0.001);

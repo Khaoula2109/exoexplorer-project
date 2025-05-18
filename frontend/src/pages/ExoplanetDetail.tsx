@@ -20,7 +20,7 @@ const ExoplanetDetail: React.FC = () => {
   const [isFavorite, setIsFavorite] = useState(false);
   const [tabSelected, setTabSelected] = useState('overview');
 
-  // Gestion de la modale
+  // Modal management
   const [modalMessage, setModalMessage] = useState<string | null>(null);
   const [modalType, setModalType] = useState<'success' | 'error'>('success');
 
@@ -33,7 +33,6 @@ const ExoplanetDetail: React.FC = () => {
     if (!id) return;
     (async () => {
       try {
-        // Utiliser l'endpoint de détail enrichi
         const response = await apiService.getExoplanetWithDetails(Number(id));
         const exo = response.data;
         
@@ -56,7 +55,7 @@ const ExoplanetDetail: React.FC = () => {
 
         setLoading(false);
       } catch (err: any) {
-        console.error("Error fetching exoplanet details:", err);
+        console.error("Error fetching exoplanet details :", err);
         setError(err.message);
         setModalMessage(t('common.error'));
         setModalType('error');
@@ -105,7 +104,7 @@ const ExoplanetDetail: React.FC = () => {
             className="w-full h-[400px] object-cover rounded-lg shadow-lg"
           />
 
-          {/* Badge d'habitabilité */}
+          {/* Habitability badge */}
           {exoplanet.potentiallyHabitable && (
             <div className="mt-4">
               <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100">
@@ -328,7 +327,7 @@ const ExoplanetDetail: React.FC = () => {
         </div>
       </div>
 
-      {/* Modal Message */}
+      {/* Message Modal */}
       <ModalMessage 
         show={!!modalMessage}
         message={modalMessage || ''}

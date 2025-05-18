@@ -8,12 +8,12 @@ import scala.concurrent.duration._
 object UserProfileScenario {
 
   val builder = scenario("Profile + Favorites + Preferences")
-    // Alimentation en données utilisateur et exoplanètes
+    // User data feed and exoplanets
     .feed(Feeder.userFeeder)
     .feed(Feeder.exoFeeder)
-    // Étape d'initialisation pour garantir la disponibilité de jwt
+    // Initialization step to ensure jwt availability
     .exec(session => {
-      // Si jwt n'est pas disponible, générer un jwt à partir de l'email du feeder
+      // If jwt is not available, generate a jwt from the feeder's email
       if (!session.contains("jwt")) {
         val email = session("email").as[String]
         session.set("jwt", JwtUtil.token(email))
@@ -21,7 +21,7 @@ object UserProfileScenario {
         session
       }
     })
-    // S'assurer que exoId est bien un entier pour les requêtes
+    // Ensure that exoId is an integer for queries
     .exec(session => {
       if (session.contains("exoId")) {
         session.set("exoIdParsed", session("exoId").as[String].toInt)
@@ -30,7 +30,7 @@ object UserProfileScenario {
         session.set("exoIdParsed", 1)
       }
     })
-    // Récupération du profil
+    // Loading user profile
     .exec(
       http("GET profile")
         .get(session => s"/api/user/profile?email=${session("email").as[String]}")
@@ -39,7 +39,7 @@ object UserProfileScenario {
         .check(bodyString.saveAs("profileResponse"))
     )
     .pause(150.millis)
-    // Gestion des favoris
+    // Favorites management
     .exec(
       http("Toggle favourite")
         .post("/api/user/toggle-favorite")
@@ -51,7 +51,7 @@ object UserProfileScenario {
         .check(status.in(200, 404))
     )
     .pause(200.millis)
-    // Récupération des favoris
+    // Loading favorites
     .exec(
       http("GET favorites")
         .get("/api/user/favorites")
@@ -59,7 +59,7 @@ object UserProfileScenario {
         .check(status.is(200))
     )
     .pause(150.millis)
-    // Mise à jour des préférences utilisateur
+    // Updating user preferences
     .randomSwitch(
       40.0 -> exec(
         http("Update preferences")
@@ -75,7 +75,7 @@ object UserProfileScenario {
       )
     )
     .pause(150.millis)
-    // Mise à jour du profil utilisateur
+    // User profile update
     .randomSwitch(
       30.0 -> exec(
         http("Update profile")
@@ -89,7 +89,7 @@ object UserProfileScenario {
       )
     )
     .pause(150.millis)
-    // Changement de mot de passe (moins fréquent)
+    // Change password (less frequent)
     .randomSwitch(
       10.0 -> exec(
         http("Change password")

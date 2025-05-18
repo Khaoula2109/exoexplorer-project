@@ -7,25 +7,25 @@ import simulations.helpers.Protocol
 import scala.concurrent.duration._
 
 /**
- * SoakSimulation - Test d'endurance sur longue durée
- * Applique une charge constante sur une période prolongée pour détecter
- * les fuites de mémoire, problèmes de connexion DB, etc.
+ * SoakSimulation - Long-Term Endurance Test
+ * Applies a constant load over an extended period to detect
+ * memory leaks, DB connection issues, etc.
  */
 class SoakSimulation extends Simulation {
 
-  // Charge de base pour le scénario principal
-  val mainUserLoad = 20 // utilisateurs par seconde
+  // Base load for the main scenario
+  val mainUserLoad = 20
 
-  // Charges pour les scénarios secondaires
-  val authUserLoad = 15  // nouveaux utilisateurs par seconde
-  val exoUserLoad = 25   // utilisateurs consultant les exoplanètes par seconde
-  val profileUserLoad = 10 // utilisateurs modifiant leur profil par seconde
+  // Charges for secondary scenarios
+  val authUserLoad = 15  // new users per second
+  val exoUserLoad = 25   // users viewing exoplanets per second
+  val profileUserLoad = 10 // users modifying their profile per second
 
-  // Durée du test
+  // Test duration
   val testDuration = 30.minutes
 
   setUp(
-    // Parcours complet d'utilisateurs
+    // Complete user journey
     FullUserScenario.builder
       .inject(
         rampUsersPerSec(1).to(mainUserLoad).during(5.minutes), // Montée progressive
@@ -33,7 +33,7 @@ class SoakSimulation extends Simulation {
         rampUsersPerSec(mainUserLoad).to(1).during(5.minutes) // Descente progressive
       ),
 
-    // Authentification de nouveaux utilisateurs
+    // Authenticating new users
     AuthenticationScenario.builder
       .inject(
         nothingFor(2.minutes),
@@ -42,7 +42,7 @@ class SoakSimulation extends Simulation {
         rampUsersPerSec(authUserLoad).to(1).during(3.minutes)
       ),
 
-    // Navigation dans les exoplanètes
+    // Navigating exoplanets
     ExoplanetScenario.builder
       .inject(
         nothingFor(3.minutes),
@@ -51,7 +51,7 @@ class SoakSimulation extends Simulation {
         rampUsersPerSec(exoUserLoad).to(1).during(5.minutes)
       ),
 
-    // Gestion de profil
+    // Profile management
     UserProfileScenario.builder
       .inject(
         nothingFor(5.minutes),
@@ -60,7 +60,7 @@ class SoakSimulation extends Simulation {
         rampUsersPerSec(profileUserLoad).to(1).during(5.minutes)
       ),
 
-    // Administration occasionnelle
+    // Occasional administration
     DataLoaderScenario.builder
       .inject(
         nothingFor(2.minutes),
@@ -73,12 +73,12 @@ class SoakSimulation extends Simulation {
   )
     .protocols(Protocol.httpProtocol)
     .assertions(
-      // Assertions pour valider la performance
-      global.responseTime.max.lt(10000),  // Le temps de réponse max ne doit pas dépasser 10 secondes
-      global.responseTime.mean.lt(3000),  // Le temps moyen ne doit pas dépasser 3 secondes
-      global.successfulRequests.percent.gte(80),  // Le pourcentage des requêtes réussies doit être supérieur à 95%
+      // Assertions to validate performance
+      global.responseTime.max.lt(10000),
+      global.responseTime.mean.lt(3000),
+      global.successfulRequests.percent.gte(80),
 
-      // Vérifications spécifiques pour le test de longue durée
+      // Specific checks for the long-term test
       global.responseTime.percentile3.lt(5000),
       details("Verify OTP").failedRequests.count.is(0),
       details("GET profile").responseTime.percentile3.lt(2000)

@@ -1,10 +1,14 @@
 package com.example.exoExplorer.dto;
 
+import lombok.Getter;
+
 /**
  * Data Transfer Object for summarized exoplanet information.
  * Used for list views and search results.
  */
+@Getter
 public class ExoplanetSummaryDTO {
+    // Getters
     private Integer id;
     private String name;
     private String imageExo;
@@ -22,8 +26,4 @@ public class ExoplanetSummaryDTO {
         this.imageExo = imageExo;
     }
 
-    // Getters
-    public Integer getId() { return id; }
-    public String getName() { return name; }
-    public String getImageExo() { return imageExo; }
 }

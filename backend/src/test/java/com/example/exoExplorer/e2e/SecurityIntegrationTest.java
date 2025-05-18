@@ -36,7 +36,7 @@ public class SecurityIntegrationTest {
     }
 
     /* ==========================================================================
-       1) Endpoints publics accessibles sans authentification
+       1) Public endpoints accessible without authentication
        ========================================================================== */
     @Test
     @Order(1)
@@ -54,7 +54,7 @@ public class SecurityIntegrationTest {
     }
 
     /* ==========================================================================
-       2) Endpoints protégés inaccessibles sans JWT
+       2) Protected endpoints inaccessible without JWT
        ========================================================================== */
     @Test
     @Order(3)
@@ -87,7 +87,7 @@ public class SecurityIntegrationTest {
     @Test
     @Order(5)
     void updateProfile_withValidJwt_shouldSucceed() throws Exception {
-        // Step 1: Signup (email déjà inscrit => ignorable si conflit)
+        // Step 1: Signup (email already registered => ignorable if conflict)
         String testEmail = "secured@test.com";
         String password = "secure123";
 
@@ -98,7 +98,7 @@ public class SecurityIntegrationTest {
         var loginReq = new LoginRequest(testEmail, password);
         restTemplate.postForEntity(url("/auth/login"), loginReq, Void.class);
 
-        // Step 3: Récupère l'OTP simulé via TestMailConfig
+        // Step 3: Retrieve the mock OTP via TestMailConfig
         String otp = TestMailConfig.lastOtp;
         assertThat(otp).isNotBlank();
 
@@ -110,7 +110,7 @@ public class SecurityIntegrationTest {
 
         String jwt = new ObjectMapper().readTree(verifyResp.getBody()).get("token").asText();
 
-        // Step 5: Appel sécurisé avec JWT
+        // Step 5: Secure calling with JWT
         HttpHeaders headers = new HttpHeaders();
         headers.setBearerAuth(jwt);
         headers.setContentType(MediaType.APPLICATION_JSON);

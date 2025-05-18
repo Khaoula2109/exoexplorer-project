@@ -154,7 +154,7 @@ const SignupPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Fenêtre modale */}
+      {/* Message Modal*/}
       <ModalMessage
         show={modal.show}
         onClose={() => setModal((prev) => ({ ...prev, show: false }))}

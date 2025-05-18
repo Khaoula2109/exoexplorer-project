@@ -8,14 +8,6 @@ export default defineConfig({
     exclude: ['lucide-react'],
   },
   server: {
-    port: 3000,
-    proxy: {
-      '/api': {
-        target: 'http://api.exoexplorer.local:8080',
-        changeOrigin: true,
-        secure: false,
-        rewrite: path => path.replace(/^\/api/, '/api'),
-      },
-    },
-  },
+    port: 3000
+  }
 });

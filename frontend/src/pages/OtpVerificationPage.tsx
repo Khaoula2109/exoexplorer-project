@@ -149,7 +149,7 @@ const OtpVerificationPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Modal Message */}
+      {/* Message Modal */}
       <ModalMessage
         show={modal.show}
         message={modal.message}

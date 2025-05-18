@@ -132,7 +132,7 @@ const ProfilePage: React.FC = () => {
     
     try {
       setGeneratingCodes(true);
-      // Nombre fixe de codes (5)
+      // Fixed number of codes (5)
       const codes = await generateBackupCodes(user.email, 5);
       setBackupCodes(codes);
       setShowBackupCodes(true);

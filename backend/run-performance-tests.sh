@@ -1,17 +1,17 @@
 #!/bin/bash
-# Script optimisé pour exécuter les tests de performance avec le profil perf
+# Optimized script to run performance tests with the perf profile
 
-# Couleurs pour une meilleure lisibilité
+# Colors for better readability
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 RED='\033[0;31m'
 NC='\033[0m' # No Color
 
 echo -e "${YELLOW}========================================================${NC}"
-echo -e "${YELLOW}      EXÉCUTION DES TESTS DE PERFORMANCE GATLING       ${NC}"
+echo -e "${YELLOW}      RUNNING GATLING PERFORMANCE TESTS                 ${NC}"
 echo -e "${YELLOW}========================================================${NC}"
 
-# 1. Vérifier si l'application est déjà en cours d'exécution avec le profil perf
+# 1. Check if the application is already running with the perf profile
 PID=$(pgrep -f "spring.profiles.active=perf" || echo "")
 if [ -n "$PID" ]; then
   echo -e "${YELLOW}Application déjà en cours d'exécution avec le profil perf (PID: $PID)${NC}"
@@ -25,11 +25,11 @@ if [ -n "$PID" ]; then
   fi
 fi
 
-# 2. Démarrer l'application avec le profil perf si nécessaire
+# 2. Start the application with the perf profile if necessary
 if [ -z "$PID" ] || [[ $restart == "o" || $restart == "O" ]]; then
   echo -e "${YELLOW}Démarrage de l'application avec le profil perf et ressources optimisées...${NC}"
   
-  # Démarrer l'application en arrière-plan avec plus de mémoire et paramètres GC optimisés
+  # Start the app in the background with more memory and optimized GC settings
   nohup mvn spring-boot:run -Dspring-boot.run.profiles=perf -Dspring-boot.run.jvmArguments="-Xmx2G -Xms1G -XX:+UseG1GC -XX:MaxGCPauseMillis=200" > perf-app.log 2>&1 &
   APP_PID=$!
   
@@ -38,21 +38,21 @@ if [ -z "$PID" ] || [[ $restart == "o" || $restart == "O" ]]; then
   sleep 45  # Augmenté pour donner plus de temps au démarrage avec les nouveaux paramètres JVM
 fi
 
-# 3. Vérifier que les dossiers existent
+# 3. Check that the files exist
 echo -e "${YELLOW}Vérification des dossiers pour les données de test...${NC}"
 mkdir -p exoExplorer-project/backend/src/test/resources/data
 
-# 4. Générer les fichiers de données pour Gatling
+# 4. Generate data files for Gatling
 echo -e "${YELLOW}Génération des fichiers de données pour les tests Gatling...${NC}"
 
-# Créer users.csv
+# Create users.csv
 echo "email,password" > src/test/resources/data/users.csv
 for i in {1..50}; do
   echo "user${i}@example.com,password${i}" >> src/test/resources/data/users.csv
 done
 echo -e "${GREEN}✓ Fichier users.csv créé avec 50 utilisateurs${NC}"
 
-# Créer exoplanets.csv
+# Create exoplanets.csv
 echo "exoId,name" > src/test/resources/data/exoplanets.csv
 # Liste de noms d'exoplanètes
 exoplanets=("Kepler-186f" "Proxima Centauri b" "TRAPPIST-1e" "TOI-700d" "HD 219134 b" 
@@ -65,16 +65,16 @@ for i in {1..20}; do
 done
 echo -e "${GREEN}✓ Fichier exoplanets.csv créé avec 20 exoplanètes${NC}"
 
-# Créer backup_codes.csv
+# Create backup_codes.csv
 echo "code" > src/test/resources/data/backup_codes.csv
 for i in {1..30}; do
-  # Génération de codes à 6 chiffres
+  # Generation of 6-digit codes
   code=$(printf "%06d" $((RANDOM % 1000000)))
   echo "$code" >> src/test/resources/data/backup_codes.csv
 done
 echo -e "${GREEN}✓ Fichier backup_codes.csv créé avec 30 codes${NC}"
 
-# 5. Créer un lien symbolique dans le dossier data à la racine (pour compatibilité)
+# 5. Create a symbolic link in the data folder at the root (for compatibility)
 echo -e "${YELLOW}Création d'un lien symbolique dans le dossier 'data' à la racine...${NC}"
 mkdir -p data
 ln -sf "$(pwd)/exoExplorer-project/backend/src/test/resources/data/users.csv" data/
@@ -84,18 +84,18 @@ echo -e "${GREEN}✓ Liens symboliques créés${NC}"
 
 # 6. Exécuter les tests Gatling
 echo -e "${YELLOW}========================================================${NC}"
-echo -e "${YELLOW}      EXÉCUTION DES TESTS GATLING                       ${NC}"
+echo -e "${YELLOW}               RUNNING GATLING TESTS                    ${NC}"
 echo -e "${YELLOW}========================================================${NC}"
 
-# Exécuter le test de fumée d'abord avec 1 seul utilisateur
+# Run the smoke test first with 1 user only
 echo -e "${YELLOW}Exécution du test de fumée (1 seul utilisateur)...${NC}"
 mvn gatling:test -Dgatling.simulationClass=simulations.SmokeSimulation -DbaseUrl=http://localhost:8080
 
-# Si le test de fumée réussit, exécuter les autres tests
+# If the smoke test passes, run the other tests
 if [ $? -eq 0 ]; then
   echo -e "${GREEN}Le test de fumée a réussi. Exécution des autres tests...${NC}"
   
-  # Demander à l'utilisateur quels tests exécuter
+  # Ask which tests to run
   echo -e "${YELLOW}Quels tests souhaitez-vous exécuter? ${NC}"
   echo "1. BaselineSimulation (Référence de performance - charge légère)"
   echo "2. LoadSimulation (Charge normale)"
@@ -162,7 +162,7 @@ else
   fi
 fi
 
-# 7. Demander si l'on veut arrêter l'application
+# 7. Ask if you want to stop the application
 read -p "Voulez-vous arrêter l'application running avec le profil perf? (o/n): " stop
 if [[ $stop == "o" || $stop == "O" ]]; then
   PID=$(pgrep -f "spring.profiles.active=perf" || echo "")
@@ -179,7 +179,7 @@ fi
 echo -e "${GREEN}Tests de performance terminés!${NC}"
 echo -e "${YELLOW}Les rapports sont disponibles dans le dossier target/gatling${NC}"
 
-# 8. Ouvrir le dernier rapport généré
+# 8. Open the last generated report
 if [ -d "target/gatling" ]; then
   LAST_REPORT=$(find target/gatling -name "index.html" | sort -r | head -1)
   if [ -n "$LAST_REPORT" ]; then
@@ -198,12 +198,12 @@ if [ -d "target/gatling" ]; then
 fi
 
 echo -e "${YELLOW}========================================================${NC}"
-echo -e "${YELLOW}      NETSTAT - CONNEXIONS ACTIVES                      ${NC}"
+echo -e "${YELLOW}              NETSTAT - ACTIVE CONNECTIONS              ${NC}"
 echo -e "${YELLOW}========================================================${NC}"
 echo -e "${YELLOW}Nombre de connexions actives sur le port 8080:${NC}"
 netstat -an | grep 8080 | grep ESTABLISHED | wc -l
 
 echo -e "${YELLOW}========================================================${NC}"
-echo -e "${YELLOW}      STATISTIQUES MÉMOIRE JVM                          ${NC}"
+echo -e "${YELLOW}              JVM MEMORY STATISTICS                     ${NC}"
 echo -e "${YELLOW}========================================================${NC}"
 jps -l | grep exoExplorer || echo "Application JVM non trouvée"

@@ -3,12 +3,17 @@ package com.example.exoExplorer.dto;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  * Data Transfer Object for OTP verification requests.
  */
+@Setter
+@Getter
 public class OtpVerificationRequest {
 
+    // Getters and Setters
     @NotBlank(message = "L'email est obligatoire")
     @Email(message = "Format d'email invalide")
     private String email;
@@ -35,10 +40,4 @@ public class OtpVerificationRequest {
         this.otp = otp;
     }
 
-    // Getters and Setters
-    public String getEmail() { return email; }
-    public void setEmail(String email) { this.email = email; }
-
-    public String getOtp() { return otp; }
-    public void setOtp(String otp) { this.otp = otp; }
 }

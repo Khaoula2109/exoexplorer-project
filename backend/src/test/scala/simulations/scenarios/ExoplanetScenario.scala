@@ -17,10 +17,10 @@ object ExoplanetScenario {
   )
 
   val builder = scenario("Browse exoplanets")
-    // Étape 1: Ajout d'une étape d'initialisation pour garantir que jwt et email sont disponibles
-    .feed(Feeder.userFeeder) // Alimentation en données utilisateur
+    // Step 1: Add an initialization step to ensure jwt and email are available
+    .feed(Feeder.userFeeder) // User data feed
     .exec(session => {
-      // Si jwt n'est pas disponible, générer un jwt à partir de l'email du feeder
+      // If jwt is not available, generate a jwt from the feeder's email
       if (!session.contains("jwt")) {
         val email = session("email").as[String]
         session.set("jwt", JwtUtil.token(email))
@@ -31,7 +31,7 @@ object ExoplanetScenario {
     .repeat(5) {
       pace(200.millis, 600.millis)
         .exec(session => {
-          // Sélectionner une requête aléatoire
+          // Select random query
           val randomQuery = queries(util.Random.nextInt(queries.length))
           session.set("randomQuery", randomQuery)
         })
@@ -50,7 +50,7 @@ object ExoplanetScenario {
             .check(status.is(200))
         )
         .pause(150.millis)
-        // Accéder aux détails d'une exoplanète aléatoire si on a récupéré un id
+        // Access the details of a random exoplanet if an ID has been retrieved
         .doIf(session => session.contains("randomExoplanetId")) {
           exec(
             http("GET exoplanet details")
@@ -60,7 +60,7 @@ object ExoplanetScenario {
           )
         }
         .pause(100.millis)
-        // Chercher des exoplanètes potentiellement habitables
+        // Searching for potentially habitable exoplanets
         .randomSwitch(
           30.0 -> exec(
             http("GET habitable exoplanets")

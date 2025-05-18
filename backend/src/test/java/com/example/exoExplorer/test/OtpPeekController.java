@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 
-/** Exposé seulement pendant les tests de perf pour récupérer le dernier OTP. */
+/** Exposed only during performance tests to retrieve the latest OTP. */
 @Profile("test")
 @RestController
 @RequestMapping("/api/test")

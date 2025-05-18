@@ -16,16 +16,15 @@ class ExoplanetImageServiceTest {
 
     @Test
     void testGetImageUrlShouldReturnCorrectUrl() {
-        // This test assumes you have a test exoplanets.json file in your test resources
+        // This test uses the exoplanets.json file from the test resources directory.
 
-        // Try getting URLs for some exoplanets
+        // Getting URLs for some exoplanets
         String url1 = imageService.getImageUrl("Kepler-22b");
         String url2 = imageService.getImageUrl("TRAPPIST-1e");
 
         // Test that the service handles unknown exoplanets gracefully
         String unknownUrl = imageService.getImageUrl("NonExistentExoplanet");
 
-        // We don't know the exact URLs in your test file, so we'll just check non-null
         // for known exoplanets and null for unknown ones
         assertNotNull(url1, "URL for Kepler-22b should not be null");
         assertNull(unknownUrl, "URL for unknown exoplanet should be null");

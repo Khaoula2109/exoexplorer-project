@@ -18,7 +18,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.util.Map;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -36,7 +35,7 @@ class UserIntegrationTest {
 
     @BeforeEach
     void setup() {
-        userRepository.deleteAll(); // Nettoyage
+        userRepository.deleteAll(); // Cleaning
 
         User user = new User();
         user.setEmail("user@test.com");

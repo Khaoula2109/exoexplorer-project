@@ -5,8 +5,8 @@ import javax.crypto.Mac
 import javax.crypto.spec.SecretKeySpec
 import java.time.Instant
 
-/** Génère côté test un JWT parfaitement compatible
- * avec TokenService (secret + algo + claims).
+/** Generates a JWT on the test side that is fully compatible
+ * with TokenService (secret + algorithm + claims).
  */
 object JwtUtil {
 
@@ -22,7 +22,7 @@ object JwtUtil {
     base64Url(mac.doFinal(data.getBytes))
   }
 
-  /** Retourne un JWT valable 2h pour l'email fourni (utilisateur standard). */
+  /** Returns a JWT valid for 2 hours for the provided email (standard user). */
   def token(email: String): String = {
     val now  = Instant.now.getEpochSecond
     val exp  = now + 7200        // 2h (augmenté pour les tests)
@@ -33,7 +33,7 @@ object JwtUtil {
     s"$head.$payl.${hmac(s"$head.$payl")}"
   }
 
-  /** Retourne un JWT valable 2h pour l'email fourni avec rôle ADMIN. */
+  /** Returns a JWT valid for 2 hours for the email provided with ADMIN role. */
   def adminToken(email: String): String = {
     val now  = Instant.now.getEpochSecond
     val exp  = now + 7200        // 2h (augmenté pour les tests)
@@ -44,7 +44,7 @@ object JwtUtil {
     s"$head.$payl.${hmac(s"$head.$payl")}"
   }
 
-  /** Affiche un JWT pour débogage. */
+  /** Displays a JWT for debugging. */
   def printJwtContent(token: String): Unit = {
     try {
       val parts = token.split('.')

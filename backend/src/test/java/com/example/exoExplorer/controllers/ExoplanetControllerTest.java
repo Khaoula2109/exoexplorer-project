@@ -25,9 +25,6 @@ class ExoplanetControllerTest {
     @Mock
     private ExoplanetService exoplanetService;
 
-    @Mock
-    private ExoplaneteRepository exoplanetRepository;
-
     @BeforeEach
     void setup() {
         MockitoAnnotations.openMocks(this);

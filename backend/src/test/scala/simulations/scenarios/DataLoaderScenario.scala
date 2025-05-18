@@ -6,9 +6,9 @@ import simulations.helpers.JwtUtil
 import scala.concurrent.duration._
 
 /**
- * Scénario pour tester les fonctionnalités du DataLoaderController
- * qui permettent de charger des données de test dans l'application.
- * Ce scénario est réservé aux administrateurs.
+ * Scenario for testing the DataLoaderController's functionality
+ * that allows loading test data into the application.
+ * This scenario is for administrators only.
  */
 object DataLoaderScenario {
 
@@ -20,40 +20,40 @@ object DataLoaderScenario {
   )
 
   val builder = scenario("Data Loader Operations")
-    // Génération d'un JWT admin valide pour l'authentification
+    // Generate a valid admin JWT for authentication
     .exec(session => {
-      // Utiliser un email admin et générer un token avec rôle ADMIN
+      // Use an admin email and generate a token with ADMIN role
       val adminEmail = adminEmails(util.Random.nextInt(adminEmails.length))
       val adminJwt = JwtUtil.adminToken(adminEmail) // Utilisation de adminToken au lieu de token
 
-      // Afficher les informations du token pour débogage
+      // Display token information for debugging
       JwtUtil.printJwtContent(adminJwt)
 
       session.set("adminEmail", adminEmail).set("adminJwt", adminJwt)
     })
     .exec { session =>
-      // Debug pour identifier le token utilisé
+      // Debug to identify the token used
       println(s"\n*** DATA LOADER DEBUG → Admin email='${session("adminEmail").as[String]}' ***")
       println(s"*** JWT='${session("adminJwt").as[String].take(20)}...' ***\n")
       session
     }
 
-    // Test du endpoint de suppression des exoplanètes
+    // Testing the exoplanet removal endpoint
     .exec(
       http("Clear All Exoplanets")
         .delete("/api/admin/data-loader/clear-exoplanets")
         .header("Authorization", session => s"Bearer ${session("adminJwt").as[String]}")
         .check(status.is(200))
         .check(bodyString.saveAs("clearResponse"))
-        .requestTimeout(15.seconds) // Timeout augmenté pour les opérations lourdes
+        .requestTimeout(15.seconds) // Increased timeout for heavy operations
     )
     .exec { session =>
       println(s"Clear Response: ${session("clearResponse").as[String]}")
       session
     }
-    .pause(1.second) // Pause plus longue pour s'assurer que la suppression est complète
+    .pause(1.second) // Longer pause to ensure deletion is complete
 
-    // Test de l'insertion des exoplanètes de test
+    // Testing the insertion of test exoplanets
     .randomSwitch(
       70.0 -> exec(
         http("Insert 500 Test Exoplanets")
@@ -61,7 +61,7 @@ object DataLoaderScenario {
           .header("Authorization", session => s"Bearer ${session("adminJwt").as[String]}")
           .check(status.is(200))
           .check(bodyString.saveAs("insertResponse"))
-          .requestTimeout(30.seconds) // Timeout largement augmenté pour cette opération lourde
+          .requestTimeout(30.seconds) // Timeout significantly increased for this heavy operation
       )
         .exec { session =>
           println(s"Insert Response: ${session("insertResponse").as[String]}")
@@ -74,16 +74,16 @@ object DataLoaderScenario {
           .header("Authorization", session => s"Bearer ${session("adminJwt").as[String]}")
           .check(status.is(200))
           .check(bodyString.saveAs("habitableResponse"))
-          .requestTimeout(15.seconds) // Timeout augmenté
+          .requestTimeout(15.seconds) // Timeout increased
       )
         .exec { session =>
           println(s"Habitable Exoplanets Response: ${session("habitableResponse").as[String]}")
           session
         }
     )
-    .pause(2.seconds) // Pause plus longue après opérations lourdes
+    .pause(2.seconds) // Longer break after major operations
 
-    // Vérification que les données ont été insérées correctement
+    // Check that the data was inserted correctly
     .exec(
       http("Verify Inserted Data")
         .get("/api/exoplanets")
@@ -98,7 +98,7 @@ object DataLoaderScenario {
     }
     .pause(1.second)
 
-    // Vérification des exoplanètes habitables si elles ont été insérées
+    // Checking habitable exoplanets if they have been inserted
     .doIf(session => session.contains("habitableResponse")) {
       exec(
         http("Verify Habitable Exoplanets")
@@ -109,7 +109,7 @@ object DataLoaderScenario {
       )
     }
 
-    // Tests du endpoint de rafraîchissement (dans ExoplanetController)
+    // Refresh endpoint tests (in ExoplanetController)
     .randomSwitch(
       40.0 -> exec(
         http("Refresh Exoplanet Data")
@@ -117,7 +117,7 @@ object DataLoaderScenario {
           .header("Authorization", session => s"Bearer ${session("adminJwt").as[String]}")
           .check(status.is(200))
           .check(bodyString.saveAs("refreshResponse"))
-          .requestTimeout(20.seconds) // Timeout largement augmenté
+          .requestTimeout(20.seconds) // Timeout greatly increased
       )
         .exec { session =>
           println(s"Refresh Response: ${session("refreshResponse").as[String]}")

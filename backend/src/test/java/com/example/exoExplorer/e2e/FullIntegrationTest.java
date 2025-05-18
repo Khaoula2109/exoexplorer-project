@@ -33,8 +33,8 @@ class FullIntegrationTest {
 
     private static final String EMAIL = "test@user.com";
     private static final String PASSWORD = "pass1234";
-    private static String jwtToken;            // partagé entre les tests
-    private static Long firstExoplanetId;      // ID inséré par /test/reset-db
+    private static String jwtToken;            // shared between tests
+    private static Long firstExoplanetId;      // ID inserted by /test/reset-db
 
     private String url(String path) {
         return "http://localhost:" + port + "/api" + path;
@@ -49,12 +49,12 @@ class FullIntegrationTest {
 
     @Test @Order(1)
     void resetDb_and_seedExoplanet() {
-        // 1-a) reset + seed (DELETE déclenche l'insertion)
+        // 1-a) reset + seed (DELETE triggers the insertion)
         assertThat(restTemplate.exchange(
                         url("/test/reset-db"), HttpMethod.DELETE, null, Void.class)
                 .getStatusCode()).isEqualTo(HttpStatus.OK);
 
-        // 1-b) liste complète (endpoint renvoie un tableau JSON)
+        // 1-b) full list (endpoint returns a JSON array)
         ParameterizedTypeReference<List<Map<String,Object>>> listType = new ParameterizedTypeReference<>() {};
         ResponseEntity<List<Map<String,Object>>> resp = restTemplate.exchange(url("/exoplanets"), HttpMethod.GET, null, listType);
 
@@ -63,7 +63,7 @@ class FullIntegrationTest {
 
         Map<String,Object> first = resp.getBody().get(0);
 
-        // --- détection robuste de la clé « id » -----------------------------
+        // --- robust detection of the ID key-----------------------------
         Object idRaw = first.getOrDefault("exoplanetId",
                 first.getOrDefault("exoplanet_id", first.get("id")));
 
@@ -77,7 +77,7 @@ class FullIntegrationTest {
 
     @Test @Order(2)
     void signup() {
-        // On supprime toute trace éventuelle d'un ancien utilisateur
+        // Any possible trace of a former user is deleted
         restTemplate.delete(url("/test/reset-user?email=" + EMAIL));
 
         SignupRequest rq = new SignupRequest(EMAIL, PASSWORD);
@@ -115,12 +115,12 @@ class FullIntegrationTest {
         HttpHeaders hdrs = new HttpHeaders();
         hdrs.setBearerAuth(jwtToken);
 
-        // 5-a) profil initial
+        // 5-a) Initial profile
         ResponseEntity<Map> profile = restTemplate.exchange(url("/user/profile?email=" + EMAIL),
                 HttpMethod.GET, new HttpEntity<>(hdrs), Map.class);
         assertThat(profile.getStatusCode()).isEqualTo(HttpStatus.OK);
 
-        // 5-b) mise à jour
+        // 5-b) Update
         hdrs.setContentType(MediaType.APPLICATION_JSON);
         Map<String,String> body = Map.of(
                 "email", EMAIL,
@@ -152,7 +152,7 @@ class FullIntegrationTest {
                         url("/user/toggle-favorite"), toggleRq, Void.class)
                 .getStatusCode()).isEqualTo(HttpStatus.OK);
 
-        /* ---------- 6-b) liste ---------- */
+        /* ---------- 6-b) List ---------- */
         ParameterizedTypeReference<List<Map<String,Object>>> listType = new ParameterizedTypeReference<>() {};
 
         ResponseEntity<List<Map<String,Object>>> favs = restTemplate.exchange(

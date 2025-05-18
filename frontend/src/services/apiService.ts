@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://api.exoexplorer.local:8080/api';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8081/api';
 
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
@@ -9,7 +9,7 @@ const apiClient = axios.create({
   },
 });
 
-// Intercepteur pour ajouter le JWT dans le header Authorization
+// Interceptor to add the JWT in the Authorization header
 apiClient.interceptors.request.use((config) => {
   const token = localStorage.getItem('token');
   if (token) {
@@ -18,7 +18,7 @@ apiClient.interceptors.request.use((config) => {
   return config;
 });
 
-// Types pour les requêtes
+// Queries
 interface LoginRequest {
   email: string;
   password: string;
@@ -62,7 +62,7 @@ interface UserPreferencesRequest {
   language?: string;
 }
 
-// Services API
+// API Services
 export default {
   // ===== AUTHENTICATION SERVICES =====
   signup: (data: SignupRequest) =>

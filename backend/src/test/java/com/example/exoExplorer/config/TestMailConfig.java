@@ -18,7 +18,7 @@ public class TestMailConfig {
         return new MailService() {
             @Override
             public void sendOtpEmail(String to, String otp) {
-                System.out.println("📨 Mock email à " + to + " : OTP = " + otp);
+                System.out.println(" Mock email à " + to + " : OTP = " + otp);
                 lastOtp = otp;
             }
         };

@@ -59,7 +59,7 @@ class TokenServiceTest {
 
     @Test
     void testTokenExpiration() throws InterruptedException {
-        // For testing expiration, use a very short expiration time
+        // For testing expiration, we used a very short expiration time
         ReflectionTestUtils.setField(tokenService, "jwtExpiration", 1); // 1ms
 
         String email = "test@example.com";

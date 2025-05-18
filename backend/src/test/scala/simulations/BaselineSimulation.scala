@@ -7,39 +7,39 @@ import simulations.helpers.Protocol
 import scala.concurrent.duration._
 
 /**
- * BaselineSimulation - Simulation de base pour établir une référence de performance
- * Utilise une charge constante légère pour vérifier le comportement normal de l'application
+ * BaselineSimulation - Baseline simulation to establish a performance baseline
+ * Uses a light constant load to verify normal application behavior
  */
 class BaselineSimulation extends Simulation {
 
-  // Définition des scénarios à tester
+  // Definition of scenarios to be tested
   val fullUserScenario = FullUserScenario.builder
   val authScenario = AuthenticationScenario.builder
   val exoScenario = ExoplanetScenario.builder
   val profileScenario = UserProfileScenario.builder
 
-  // Simulation de l'utilisateur avec une charge constante
+  // User simulation with constant load
   setUp(
-    // Scénario complet avec parcours utilisateur intégral
+    // Complete scenario with full user journey
     fullUserScenario
       .inject(
-        constantUsersPerSec(1).during(2.minutes) // 1 utilisateur par seconde pendant 2 minutes
+        constantUsersPerSec(1).during(2.minutes) // 1 user per second for 2 minutes
       ),
 
-    // Test d'authentification uniquement
+    // Authentication test only
     authScenario
       .inject(
-        constantUsersPerSec(2).during(1.minute) // 2 utilisateurs par seconde pendant 1 minute
+        constantUsersPerSec(2).during(1.minute) // 2 users per second for 1 minute
       ),
 
-    // Navigation parmi les exoplanètes
+    // Navigating among exoplanets
     exoScenario
       .inject(
-        nothingFor(30.seconds), // Attendre que les utilisateurs soient authentifiés
+        nothingFor(30.seconds), // Wait for users to be authenticated
         constantUsersPerSec(2).during(1.minute)
       ),
 
-    // Gestion du profil utilisateur
+    // User profile management
     profileScenario
       .inject(
         nothingFor(40.seconds),
@@ -48,12 +48,12 @@ class BaselineSimulation extends Simulation {
   )
     .protocols(Protocol.httpProtocol)
     .assertions(
-      // Assertions pour valider la performance de base
-      global.responseTime.max.lt(5000),  // Le temps de réponse max ne doit pas dépasser 3 secondes
-      global.responseTime.mean.lt(2000),  // Temps moyen de réponse sous 800ms
-      global.successfulRequests.percent.gte(80),  // Au moins 90% des requêtes réussies
+      // Assertions to validate basic performance
+      global.responseTime.max.lt(5000),  // Maximum response
+      global.responseTime.mean.lt(2000),  //Average response
+      global.successfulRequests.percent.gte(80),  // Successful queries
 
-      // Assertions spécifiques pour les opérations critiques
+      // Specific assertions for critical operations
       details("Verify OTP").successfulRequests.percent.gte(80),
       details("Login").responseTime.percentile3.lt(2000)
     )

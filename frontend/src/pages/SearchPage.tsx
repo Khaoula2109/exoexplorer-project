@@ -29,7 +29,7 @@ const SearchPage: React.FC = () => {
     type: 'success' as 'success' | 'error',
   });
 
-  // Filtres
+  // Filters
   const [minTemp, setMinTemp] = useState('');
   const [maxTemp, setMaxTemp] = useState('');
   const [minDistance, setMinDistance] = useState('');
@@ -42,7 +42,7 @@ const SearchPage: React.FC = () => {
     ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400'
     : 'bg-gray-50 border-gray-300 text-gray-900 placeholder-gray-500';
 
-  // Charger les favoris de l'utilisateur si connecté
+  // Load user favorites if logged in
   useEffect(() => {
     if (user?.email) {
       apiService.getFavorites(user.email)
@@ -51,7 +51,7 @@ const SearchPage: React.FC = () => {
           setFavorites(favIds);
         })
         .catch((err) => {
-          console.error("Error fetching favorites:", err);
+          console.error("Erreur lors de la récupération des favoris :", err);
         });
     }
   }, [user]);
@@ -84,7 +84,7 @@ const SearchPage: React.FC = () => {
         setExoplanets(formattedExoplanets);
         setTotalPages(response.data.totalPages || 0);
       } catch (err: any) {
-        console.error("Error fetching exoplanets:", err);
+        console.error("Erreur lors de la récupération des exoplanètes :", err);
         setError(err.message || t('search.error'));
       } finally {
         setLoading(false);
@@ -347,7 +347,7 @@ const SearchPage: React.FC = () => {
         </div>
       )}
 
-      {/* Modal Message */}
+      {/* Message Modal */}
       <ModalMessage
         show={modal.show}
         message={modal.message}

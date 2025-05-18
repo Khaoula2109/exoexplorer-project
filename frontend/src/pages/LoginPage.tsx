@@ -5,7 +5,7 @@ import { LogIn } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../contexts/ThemeContext';
 import { useAuth } from '../contexts/AuthContext';
-import ModalMessage from '../components/ModalMessage'; // 🧩 Modale
+import ModalMessage from '../components/ModalMessage'; 
 
 const LoginPage: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -69,7 +69,7 @@ const LoginPage: React.FC = () => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 ${inputClass}`}
-                placeholder="you@example.com"
+                placeholder="you@gmail.com"
                 required
               />
             </div>
@@ -107,7 +107,7 @@ const LoginPage: React.FC = () => {
           </p>
         </div>
       </div>
-      {/* ✅ Modale message */}
+      {/* Message Modal */}
       <ModalMessage
         show={modal.show}
         message={modal.message}
