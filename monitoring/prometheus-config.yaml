@@ -12,6 +12,7 @@ data:
       evaluation_interval: 15s
 
     scrape_configs:
+      # Découverte automatique des pods avec annotation
       - job_name: 'kubernetes-pods'
         kubernetes_sd_configs:
         - role: pod
@@ -34,3 +35,10 @@ data:
           regex: ([^:]+)(?::\d+)?;(\d+)
           replacement: $1:$2
           target_label: __address__
+
+      # Scrape statique de l’application Spring Boot
+      - job_name: 'exoexplorer-backend'
+        metrics_path: /actuator/prometheus
+        static_configs:
+        - targets: ['exoexplorer-backend-service.exoexplorer.svc.cluster.local:8081']
+
