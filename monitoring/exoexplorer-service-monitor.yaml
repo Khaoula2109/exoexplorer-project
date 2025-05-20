@@ -1,0 +1,34 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: exoexplorer-backend-monitor
+  namespace: exoexplorer
+  labels:
+    app: exoexplorer-backend
+spec:
+  selector:
+    app: exoexplorer-backend
+  ports:
+    - name: http
+      port: 8081
+      targetPort: 8081
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: exoexplorer-backend-monitor
+  namespace: observability
+  labels:
+    release: kube-prom-stack
+spec:
+  selector:
+    matchLabels:
+      app: exoexplorer-backend
+  namespaceSelector:
+    matchNames:
+      - exoexplorer
+  endpoints:
+    - port: http
+      path: /actuator/prometheus
+      interval: 15s
+

@@ -72,7 +72,8 @@ public class SecurityConfig {
                                 "/api/auth/**",      // login, signup, otp
                                 "/api/exoplanets/**", // exoplanets publics
                                 "/api/test/**",      // endpoints de test
-                                "/actuator/health"   // health check
+                                "/actuator/health",   // health check
+                                "/actuator/prometheus"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )
