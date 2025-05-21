@@ -43,6 +43,7 @@ The backend is built with a well-structured monolithic architecture using Spring
 - **Exoplanet Details**: Access information about each exoplanet's temperature, mass, radius, orbital period, and more
 - **Habitability Assessment**: Determine if an exoplanet falls within the habitable zone based on scientific criteria
 - **Earth Comparison**: Compare exoplanet characteristics to Earth for better understanding of scale
+
 ![Earth Comparison](frontend/public/image-3.png)
 
 ### Secure Authentication System
@@ -65,7 +66,7 @@ ExoExplorer leverages modern DevOps practices to ensure reliability, scalability
 
 ### CI/CD Pipeline
 
-![CI/CD Pipeline](devops/jenkins-pipeline.png)
+![alt text](frontend/public/image-8.png)
 
 Our comprehensive CI/CD pipeline automates the entire software delivery process:
 
@@ -75,21 +76,11 @@ Our comprehensive CI/CD pipeline automates the entire software delivery process:
 - **Docker Hub Integration**: Seamless container publication
 - **Quality Gates**: Ensuring code quality before deployment
 
-```yaml
-// Example stage from our Jenkinsfile
-stage('Build & Test') {
-  steps {
-    sh 'npm install && npm run test'
-    sh 'mvn clean package'
-  }
-}
-```
 
 ### Containerization & Orchestration
 
-![Running Kubernetes Pods](devops/kubectl-get-pods.png)
+![alt text](frontend/public/image-7.png)
 
-**Figure — Pods successfully deployed across all namespaces**  
 This screenshot shows all running pods across namespaces, including:
 * 🟢 `exoexplorer` → Backend and frontend microservices (Spring Boot & React)
 * 🟢 `observability` → Grafana, Prometheus, Alertmanager, Mailhog
@@ -108,7 +99,7 @@ ExoExplorer leverages containerization and orchestration for environment consist
 
 ### Observability & Monitoring
 
-![Grafana Dashboard](devops/grafana-dashboard.png)
+![alt text](frontend/public/image-9.png)
 
 Comprehensive monitoring stack for real-time application health insights:
 
@@ -125,7 +116,6 @@ Our entire infrastructure is defined as code, ensuring reproducibility and consi
 
 - **Kubernetes Manifests**: Declarative definition of all infrastructure components
 - **Jenkinsfile**: Pipeline definition as code
-- **Docker Compose**: Development environment parity
 - **Helm Charts**: Templated application deployment
 - **Host Configuration**: Automated host setup scripts
 
@@ -185,8 +175,6 @@ Our application follows a layered architecture with clean separation of concerns
 
 ### Infrastructure Architecture
 
-![Infrastructure Overview](devops/infrastructure-overview.png)
-
 Our cloud-native infrastructure features:
 
 1. **Frontend Tier**: Stateless React containers served via Nginx
@@ -228,9 +216,14 @@ ExoExplorer implements several design patterns to ensure code maintainability, f
 
 ### Multi-layered Authentication
 1. **Password + OTP**: Two-factor authentication using email-based OTP
+
 ![Authentication](frontend/public/image.png)
 
+![alt text](frontend/public/image-10.png)
+
 2. **Backup Codes**: Additional recovery option for account access
+
+
 ![Backup Codes](frontend/public/image-2.png)
 
 3. **JWT Authentication**: Secure, stateless authentication with role-based access control
@@ -324,7 +317,7 @@ sudo snap install microk8s --channel=1.30/stable --classic
 sudo usermod -aG microk8s $USER
 microk8s status --wait-ready
 microk8s enable dns storage ingress
-microk8s enable prometheus grafana   # for observability
+microk8s enable observability
 ```
 
 2. Apply Kubernetes manifests:
@@ -359,7 +352,7 @@ echo deb [signed-by=/usr/share/keyrings/jenkins-keyring.asc] \
   https://pkg.jenkins.io/debian-stable binary/ | \
   sudo tee /etc/apt/sources.list.d/jenkins.list >/dev/null
 sudo apt update
-sudo apt install -y openjdk-17-jdk jenkins git
+sudo apt install -y openjdk-21-jdk jenkins git
 ```
 
 2. Configure Jenkins with required plugins:
@@ -422,7 +415,9 @@ Integration tests verify interactions between components. Examples include:
 ### E2E Tests
 End-to-end tests check complete user journeys through the system:
 - `FullIntegrationTest` - Testing the full signup, login, and favorites flow
+
 ![Test Interface](frontend/public/image-4.png)
+
 - `SecurityIntegrationTest` - Testing security configurations
 
 ### Running Tests
@@ -466,6 +461,7 @@ During tests, performance is monitored with:
 - Success rate percentages
 - Resource utilization (CPU, memory)
 - Database connection metrics
+
 ![Performance Metrics](frontend/public/image-1.png)
 
 ## Multilingual Support
@@ -547,12 +543,3 @@ The application is deployed using the following Kubernetes resources:
 - **Ingress**: Route traffic to services
 - **ConfigMaps**: Store configuration data
 - **Secrets**: Store sensitive information
-- **HorizontalPodAutoscalers**: Automatically scale based on metrics
-
-## Contributing
-
-We welcome contributions to ExoExplorer! Please see our [CONTRIBUTING.md](CONTRIBUTING.md) for details.
-
-## License
-
-This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details.
