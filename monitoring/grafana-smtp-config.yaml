@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-smtp-config
+  namespace: observability
+data:
+  grafana.ini: |
+    [smtp]
+    enabled = true
+    host = smtp.gmail.com:587
+    user = wissaleln@gmail.com
+    password = zjrf aucq lcvp dvlw
+    from_address = wissaleln@gmail.com
+    from_name = Grafana Alerts
+    skip_verify = true
+    startTLS_policy = Opportunistic
+

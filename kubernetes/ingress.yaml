@@ -12,44 +12,44 @@ metadata:
 spec:
   ingressClassName: public
   rules:
-    - host: exoexplorer.local
-      http:
-        paths:
-          - path: /
-            pathType: Prefix
-            backend:
-              service:
-                name: exoexplorer-frontend-service
-                port:
-                  number: 80
-    - host: api.exoexplorer.local
-      http:
-        paths:
-          - path: /
-            pathType: Prefix
-            backend:
-              service:
-                name: exoexplorer-backend-service
-                port:
-                  number: 8081
-    - host: grafana.exoexplorer.local
-      http:
-        paths:
-          - path: /
-            pathType: Prefix
-            backend:
-              service:
-                name: grafana
-                port:
-                  number: 80
-    - host: prometheus.exoexplorer.local
-      http:
-        paths:
-          - path: /
-            pathType: Prefix
-            backend:
-              service:
-                name: prometheus
-                port:
-                  number: 9090
+  - host: exoexplorer.local
+    http:
+      paths:
+        - path: /
+          pathType: Prefix
+          backend:
+            service:
+              name: exoexplorer-frontend-service
+              port:
+                number: 80
+  - host: api.exoexplorer.local
+    http:
+      paths:
+        - path: /
+          pathType: Prefix
+          backend:
+            service:
+              name: exoexplorer-backend-service
+              port:
+                number: 8081
+  - host: grafana.exoexplorer.local
+    http:
+      paths:
+        - path: /
+          pathType: Prefix
+          backend:
+            service:
+              name: grafana
+              port:
+                number: 80
+  - host: prometheus.exoexplorer.local
+    http:
+      paths:
+        - path: /
+          pathType: Prefix
+          backend:
+            service:
+              name: prometheus
+              port:
+                number: 9090
 

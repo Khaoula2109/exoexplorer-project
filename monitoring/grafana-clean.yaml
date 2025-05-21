@@ -1,0 +1,5 @@
+grafana:
+  # Supprimer toutes les configurations SMTP
+  envFromSecret: null
+  env:
+    GF_SMTP_ENABLED: "false"

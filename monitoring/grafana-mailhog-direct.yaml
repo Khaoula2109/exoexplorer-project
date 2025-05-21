@@ -1,0 +1,7 @@
+grafana:
+  grafana.ini:
+    smtp:
+      enabled: true
+      host: mailhog.observability:1025
+      from_address: grafana@example.com
+      from_name: Grafana Alerts
